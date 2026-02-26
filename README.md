@@ -1,11 +1,9 @@
 ## ALYRA
 
 Alyra is a smart prepaid solar energy platform designed for off-grid rural households. It enables users to purchase electricity units via paycode (usable offline and on feature phones), and the system vends electricity units directly to smart meters.
-
 Alyra predicts energy depletion before outages occur, recommends optimal recharge amounts, supports flexible top-ups, and integrates with Interswitch API for secure transactions.
 
 Alyra makes energy access simple, inclusive, and dependable.
-
 ---
 
 ## Overview

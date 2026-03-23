@@ -74,7 +74,7 @@ CREATE TABLE grid_meters (
     id                      UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     device_id               UUID UNIQUE NOT NULL REFERENCES devices(id) ON DELETE CASCADE,
     meter_number            VARCHAR(20) UNIQUE NOT NULL,
-    tarrif_kobo_per_kwh     BIGINT NOT NULL,
+    tariff_kobo_per_kwh     BIGINT NOT NULL,
     units_balance           DECIMAL(12, 4) NOT NULL DEFAULT 0.0000,
     last_vend_at            TIMESTAMPTZ
 );
@@ -84,7 +84,7 @@ CREATE TABLE grid_meters (
 CREATE TABLE solar_kits (
     id                      UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     device_id               UUID UNIQUE NOT NULL REFERENCES devices(id) ON DELETE CASCADE,
-    kits_serial_number      VARCHAR(50) UNIQUE NOT NULL,
+    kit_serial_number      VARCHAR(50) UNIQUE NOT NULL,
     battery_percent         SMALLINT NOT NULL DEFAULT 0 CHECK (battery_percent >= 0 AND battery_percent <= 100),
     daily_rate_kobo         BIGINT NOT NULL, --RATE IN KOBO--
     is_active               BOOLEAN NOT NULL DEFAULT false,

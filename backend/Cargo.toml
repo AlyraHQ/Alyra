@@ -21,4 +21,4 @@ uuid = { version = "1.21.0", features = ["serde", "v4"] }
 tower-http = { version = "0.6.8", features = ["cors"] }
 anyhow = "1.0.102"
 actix-web = "4.13.0"
-redis = "1.0.4"
+redis = { version = "0.27.5", features = ["tokio-comp", "aio", "connection-manager"] }

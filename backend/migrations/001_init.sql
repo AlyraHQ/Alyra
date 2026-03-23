@@ -96,7 +96,7 @@ CREATE TABLE solar_kits (
 --- Txn schema ---
 CREATE TABLE transactions (
     id                      UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id                 UUID NOT NULL REFERNCES users(id) ON DELETE RESTRICT,
+    user_id                 UUID NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
     device_id               UUID NOT NULL REFERENCES devices(id) ON DELETE RESTRICT,
     amount_kobo             BIGINT NOT NULL CHECK (amount_kobo > 0),
     units_purchased         DECIMAL(12, 4) NOT NULL,
@@ -112,7 +112,7 @@ CREATE TABLE transactions (
 --token schema--
 CREATE TABLE tokens (
     id                      UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    transaction_id          UUID NOT NULL REFERNCES transactions(id) ON DELETE RESTRICT,
+    transaction_id          UUID NOT NULL REFERENCES transactions(id) ON DELETE RESTRICT,
     device_id               UUID NOT NULL REFERENCES devices(id) ON DELETE RESTRICT,
     token_code              VARCHAR(20) UNIQUE NOT NULL, --20 DIGIT CODE FOR TOKEN
     units                   DECIMAL(12, 4) NOT NULL,

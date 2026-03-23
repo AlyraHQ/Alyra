@@ -22,3 +22,4 @@ tower-http = { version = "0.6.8", features = ["cors"] }
 anyhow = "1.0.102"
 actix-web = "4.13.0"
 redis = { version = "0.27.5", features = ["tokio-comp", "aio", "connection-manager"] }
+dotenvy = "0.15.7"

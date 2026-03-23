@@ -1,3 +1,4 @@
+use anyhow::Ok;
 use dotenv::dotenv;
 
 mod dto;
@@ -12,12 +13,13 @@ mod repository;
 mod services;
 
 #[tokio::main]
-async fn main() {
+async fn main()-> anyhow::Result<()> {
     
-    //env variable
-    let _ = dotenv();
+    //load env variable
+    let _ = dotenvy::dotenv();
 
     //logging - tracing 
+    
 
     //ld Config of env
 
@@ -32,4 +34,6 @@ async fn main() {
     //route
 
     //server connection 
+
+    Ok(())
 }

@@ -1,8 +1,10 @@
+use actix_web::{HttpServer, web};
 use anyhow::Ok;
+use tower_http::cors::Cors;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 use tracing::info;
 
-use crate::config::Config;
+use crate::{config::Config, state::AppState};
 
 mod dto;
 mod config;
@@ -46,12 +48,18 @@ info!("....hold Backend services starting");
     //redis connect
     let redis_client = redis::Client::open(config.redis_url.clone())?;
     let redis = redis::aio::ConnectionManager::new(redis_client).await?;
-    info!("Redis connection made successfully")
+    info!("Redis connection made successfully");
 
-    
+    //appstate - bundled for easy actix web sahring across requests
+    let state = web::Data::new(AppState::new(db, redis, config.clone()));
 
-    //appstate from state
+    //http server connection 
+    let bind_addy = format!("0.0.0.0:{}", config.port);
+    info!("Server connection starting on {}", bind_addy);
 
+    HttpServer::new(move || {
+        let cors = Cors::
+    })
     //route
 
     //server connection 

@@ -32,6 +32,7 @@ CREATE TABLE vendors (
     updated_at              TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+
 -- User Schema --
 CREATE TABLE users (
     id                      UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -51,6 +52,7 @@ CREATE TABLE users (
     updated_at              TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+
 ---device schema {parent - grid & solar } --
 CREATE TABLE devices (
     id                      UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -66,6 +68,7 @@ CREATE TABLE devices (
     updated_at              TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+
 --grid meter{child device}--
 CREATE TABLE grid_meters (
     id                      UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -75,6 +78,7 @@ CREATE TABLE grid_meters (
     units_balance           DECIMAL(12, 4) NOT NULL DEFAULT 0.0000,
     last_vend_at            TIMESTAMPTZ
 );
+
 
 --- solar device {child device} ---
 CREATE TABLE solar_kits (
@@ -88,7 +92,8 @@ CREATE TABLE solar_kits (
     activated_at            TIMESTAMPTZ
 );
 
---- Txn ---
+
+--- Txn schema ---
 CREATE TABLE transactions (
     id                      UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id                 UUID NOT NULL REFERNCES users(id) ON DELETE RESTRICT,
@@ -103,7 +108,8 @@ CREATE TABLE transactions (
     completed_at            TIMESTAMPTZ
 );
 
---token--
+
+--token schema--
 CREATE TABLE tokens (
     id                      UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     transaction_id          UUID NOT NULL REFERNCES transactions(id) ON DELETE RESTRICT,
@@ -115,3 +121,63 @@ CREATE TABLE tokens (
     expires_at              TIMESTAMPTZ NOT NULL,
     created_at              TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+
+ALTER TABLE transactions
+    ADD CONSTRAINT fk_transactions_token
+    FOREIGN KEY (token_id) REFERENCES tokens(id) ON DELETE SET NULL;
+
+--- consumption log schema ---
+CREATE TABLE consumption_logs (
+    id                      UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    device_id               UUID NOT NULL REFERENCES devices(id) ON DELETE CASCADE,
+    units_remaining         DECIMAL(12, 4) NOT NULL, ---kwh - grid and % for solar
+    previous_reading        DECIMAL(12, 4),
+    consumption_rate        DECIMAL(10, 6), --calculated as units/hr at the inserted time *note
+    reading_trigger         reading_trigger NOT NULL DEFAULT 'scheduled',
+    recorded_at             TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+
+--alerts schema --
+CREATE TABLE alerts (
+    id                UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id           UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    device_id         UUID NOT NULL REFERENCES devices(id) ON DELETE CASCADE,
+    alert_type        alert_type NOT NULL,
+    message           TEXT NOT NULL,
+    sent_via          alert_channel NOT NULL,
+    status            alert_status NOT NULL DEFAULT 'pending',
+    scheduled_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    sent_at           TIMESTAMPTZ,
+    created_at        TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+
+--- Index schema - for speedup of queries---
+-- Users INDEX —-- query phone on every login
+CREATE INDEX idx_users_phone ON users(phone);
+CREATE INDEX idx_users_vendor_id ON users(vendor_id);
+
+-- Devices index — query by both our user and vendor
+CREATE INDEX idx_devices_user_id ON devices(user_id);
+CREATE INDEX idx_devices_vendor_id ON devices(vendor_id);
+CREATE INDEX idx_devices_type ON devices(device_type);
+
+-- Txn Index — txn dashboard preview user by their status
+CREATE INDEX idx_transactions_user_id ON transactions(user_id);
+CREATE INDEX idx_transactions_device_id ON transactions(device_id);
+CREATE INDEX idx_transactions_status ON transactions(status);
+CREATE INDEX idx_transactions_initiated_at ON transactions(initiated_at DESC);
+
+-- Tokens Index--— must validate on every meter entry
+CREATE INDEX idx_tokens_token_code ON tokens(token_code);
+CREATE INDEX idx_tokens_device_id ON tokens(device_id);
+
+-- Consumption logs Index--— predict the logs queries by device + time
+CREATE INDEX idx_consumption_device_id ON consumption_logs(device_id);
+CREATE INDEX idx_consumption_recorded_at ON consumption_logs(recorded_at DESC);
+
+-- Alerts Index — query user by status
+CREATE INDEX idx_alerts_user_id ON alerts(user_id);
+CREATE INDEX idx_alerts_status ON alerts(status);

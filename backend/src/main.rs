@@ -44,6 +44,9 @@ info!("....hold Backend services starting");
     info!("Db migrated");
 
     //redis connect
+    let redis_client = redis::Client::open(config.redis_url.clone())?;
+    let redis = redis::aio::ConnectionManager::new(redis_client).await?;
+    info!("Redis connection made successfully")
 
     
 

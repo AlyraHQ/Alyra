@@ -74,4 +74,28 @@ CREATE TABLE grid_meters (
     tarrif_kobo_per_kwh     BIGINT NOT NULL,
     units_balance           DECIMAL(12, 4) NOT NULL DEFAULT 0.0000,
     last_vend_at            TIMESTAMPTZ
-)
+);
+
+--- solar device {child device} ---
+CREATE TABLE solar_kits (
+    id                      UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    device_id               UUID UNIQUE NOT NULL REFERENCES devices(id) ON DELETE CASCADE,
+    kits_serial_number      VARCHAR(50) UNIQUE NOT NULL,
+    battery_percent         SMALLINT NOT NULL DEFAULT 0 CHECK (battery_percent >= 0 AND battery_percent <= 100),
+    daily_rate_kobo         BIGINT NOT NULL, --RATE IN KOBO--
+    is_active               BOOLEAN NOT NULL DEFAULT false,
+    next_payment_due        TIMESTAMPTZ,
+    activated_at            TIMESTAMPTZ
+);
+
+--- Txn ---
+CREATE TABLE transactions (
+    id                      UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id                 UUID NOT NULL REFERNCES users(id) ON DELETE RESTRICT,
+    device_id               UUID NOT NULL REFERENCES devices(id) ON DELETE RESTRICT,
+    amount_kobo             BIGINT NOT NULL CHECK (amount_kobo > 0),
+    units_purchased         DECIMAL(12, 4) NOT NULL,
+    channel                 payment_channel NOT NULL,
+    status                  txn_status NOT NULL DEFAULT 'pending',
+    interswitch_ref         VARCHAR(100)
+);

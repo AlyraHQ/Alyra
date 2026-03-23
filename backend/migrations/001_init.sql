@@ -97,5 +97,21 @@ CREATE TABLE transactions (
     units_purchased         DECIMAL(12, 4) NOT NULL,
     channel                 payment_channel NOT NULL,
     status                  txn_status NOT NULL DEFAULT 'pending',
-    interswitch_ref         VARCHAR(100)
+    interswitch_ref         VARCHAR(100) UNIQUE,
+    token_id                UUID,
+    initiated_at            TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    completed_at            TIMESTAMPTZ
+);
+
+--token--
+CREATE TABLE tokens (
+    id                      UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    transaction_id          UUID NOT NULL REFERNCES transactions(id) ON DELETE RESTRICT,
+    device_id               UUID NOT NULL REFERENCES devices(id) ON DELETE RESTRICT,
+    token_code              VARCHAR(20) UNIQUE NOT NULL, --20 DIGIT CODE FOR TOKEN
+    units                   DECIMAL(12, 4) NOT NULL,
+    is_used                 BOOLEAN NOT NULL DEFAULT false,
+    used_at                 TIMESTAMPTZ,
+    expires_at              TIMESTAMPTZ NOT NULL,
+    created_at              TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );

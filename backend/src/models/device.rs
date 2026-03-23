@@ -6,9 +6,9 @@ use uuid::Uuid;
 
 #[derive(Debug, Serialize, Deserialize, FromRow, PartialEq, Clone)]
 pub struct Device {
-    pub id:         Uuid,
-    pub user_id:     Uuid,
-    pub vendor_id:   Uuid,
+    pub id:             Uuid,
+    pub user_id:        Uuid,
+    pub vendor_id:      Uuid,
     pub device_name:    String,
     pub device_type:    String,
     pub status:         String,

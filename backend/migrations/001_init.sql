@@ -182,24 +182,3 @@ CREATE INDEX idx_consumption_recorded_at ON consumption_logs(recorded_at DESC);
 CREATE INDEX idx_alerts_user_id ON alerts(user_id);
 CREATE INDEX idx_alerts_status ON alerts(status);
 
---Auto uodate and updated at {auto updates updated_at on every row}--
----so manually set updated_at in codebase---
-CREATE OR REPLACE FUNCTION update_updated_at()
-RETURNS TRIGGER AS $$
-BEGIN
-    NEW.updated_at = NOW();
-    RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
-CREATE TRIGGER vendors_updated_at
-    BEFORE UPDATE ON vendors
-    FOR EACH ROW EXECUTE FUNCTION update_updated_at();
-
-CREATE TRIGGER users_updated_at
-    BEFORE UPDATE ON users
-    FOR EACH ROW EXECUTE FUNCTION update_updated_at();
-
-CREATE TRIGGER devices_updated_at
-    BEFORE UPDATE ON devices
-    FOR EACH ROW EXECUTE FUNCTION update_updated_at();

@@ -1,5 +1,5 @@
 use anyhow::Ok;
-use dotenv::dotenv;
+use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
 mod dto;
 mod config;
@@ -18,8 +18,13 @@ async fn main()-> anyhow::Result<()> {
     //load env variable
     let _ = dotenvy::dotenv();
 
-    //logging - tracing 
-    
+    //logging - tracing - debug 
+    tracing_subscriber::registry().with(
+        tracing_subscriber::EnvFilter::try_from_default_env()
+        .unwrap_or_else(|_| "alyra=debug, actix_web=info".into()),
+    )
+    .with(tracing_subscriber::fmt::layer())
+    .init();
 
     //ld Config of env
 

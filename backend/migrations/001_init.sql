@@ -19,7 +19,18 @@ CREATE TYPE kyc_level AS ENUM ('phone_only', 'name_added', 'full_kyc');
 -- Vendor Schema --
 CREATE TABLE vendors (
     id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-)
+    business_name   VARCHAR(200) NOT NULL,
+    owner_name      VARCHAR(200) NOT NULL,
+    phone           VARCHAR(15) UNIQUE NOT NULL,
+    email           VARCHAR(200) UNIQUE,
+    cac_number      VARCHAR(50),
+
+--commission/txn - 1.5%
+    commission_bp   SMALLINT NOT NULL DEFAULT 150,
+    is_approved     BOOLEAN NOT NULL DEFAULT false,
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
 
 -- User Schema --
 CREATE TABLE users (
@@ -37,5 +48,7 @@ CREATE TABLE users (
     is_verified     BOOLEAN NOT NULL DEFAULT false,
     kyc_level       kyc_level NOT NULL DEFAULT 'phone_only',
     created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    updated_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+---device schema --

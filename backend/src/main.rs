@@ -1,4 +1,4 @@
-use actix_web::{HttpServer, web};
+use actix_web::{App, HttpServer, middleware::Logger, web};
 use anyhow::Ok;
 use tower_http::cors::Cors;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
@@ -58,8 +58,25 @@ info!("....hold Backend services starting");
     info!("Server connection starting on {}", bind_addy);
 
     HttpServer::new(move || {
-        let cors = Cors::
+        let cors = Cors::permissive();
+        .allowed_origin(&config.frontend_url)
+        .allowed_methods(vec!["GET", "POST", "PUT", "DELETE"])
+        .allowed_headers(vec![
+            actix_web::http::header::AUTHORIZATION,
+            actix_web::http::header::CONTENT_TYPE,
+        ])
+        .max_age(3600);
+
+    App::new()
+    .app_data(state.clone())
+    .wrap(cors)
+    .wrap(Logger::default())
+    // .configure(routes::auth_routes::configure)
     })
+    .bind(&bind_addy)?
+    .workers(4)
+    .run()
+    .await?;
     //route
 
     //server connection 

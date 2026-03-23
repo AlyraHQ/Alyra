@@ -2,7 +2,7 @@
 
 > *Reliable electricity, predictable and affordable, for every Nigerian household regardless of income, location, or energy source.*
 
-![Alyra System Architecture](alyra-system-design.svg)
+![Alyra System Architecture](docs/alyra-system-design.svg)
 
 ## Table of Contents
 

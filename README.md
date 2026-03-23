@@ -1,6 +1,7 @@
 # Alyra
 
-> _Reliable electricity, predictable and affordable, for every Nigerian household regardless of income, location, or energy source._
+> *Alyra is a smart energy platform that provides flexible, inclusive, and predictive electricity access for rural and semi-urban households in Nigeria. It unifies prepaid grid meters and PAYG solar home systems under one seamless interface, enabling users to purchase energy, receive predictive consumption alerts, and make incremental payments regardless of internet connectivity or phone type.
+Alyra empowers households to access electricity without unexpected outages, align energy spending with irregular incomes, and optimize usage for long-term sustainability.*
 
 ![Alyra System Architecture](docs/alyra-system-design.svg)
 

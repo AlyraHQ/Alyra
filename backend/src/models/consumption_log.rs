@@ -9,8 +9,8 @@ pub struct ConsumptionLog {
     pub id:                        Uuid,
     pub device_id:                 Uuid,
     pub units_remaining:           BigDecimal,
-    pub previous_reading :         BigDecimal,
-    pub consumption_rate:          BigDecimal, 
+    pub previous_reading :         Option<BigDecimal>,
+    pub consumption_rate:          Option<BigDecimal>,
     pub reading_trigger:           String,
     pub recorded_at:               DateTime<Utc>
 }

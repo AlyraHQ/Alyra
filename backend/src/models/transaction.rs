@@ -14,7 +14,7 @@ pub struct Transaction {
     pub channel:            String,
     pub status:             String,
     pub interswitch_ref:    Option<String>,
-    pub token_id:           Uuid,
+    pub token_id:           Option<Uuid>,
     pub initiated_at:       DateTime<Utc>,
     pub completed_at:       Option<DateTime<Utc>>
 }

@@ -6,15 +6,14 @@ use crate::models::user::User;
 
 
 pub async fn create(pool: &PgPool, phone: &str, pin_hash: &str, vendor_id: Option<Uuid>) -> Result<User, sqlx::Error> {
-    let user = sqlx::query_as!(
-        User,
+    let user = sqlx::query_as::<_, User>(
         "INSERT INTO users (phone, pin_hash, vendor_id)
         VALUES ($1, $2, $3)
-        RETURNING *",
-        phone,
-        pin_hash,
-        vendor_id
+        RETURNING *"
     )
+    .bind(phone)
+    .bind(pin_hash)
+    .bind(vendor_id)
     .fetch_one(pool)
     .await?;
 
@@ -22,11 +21,10 @@ pub async fn create(pool: &PgPool, phone: &str, pin_hash: &str, vendor_id: Optio
 }
 
 pub async fn find_by_phone(pool: &PgPool, phone: &str) -> Result<Option<User>, sqlx::Error> {
-    let user = sqlx::query_as!(
-        User,
-        "SELECT * FROM users WHERE phone = $1",
-        phone
+    let user = sqlx::query_as::<_, User>(
+        "SELECT * FROM users WHERE phone = $1"
     )
+    .bind(phone)
     .fetch_optional(pool)
     .await?;
 Ok(user)
@@ -34,11 +32,10 @@ Ok(user)
 }
 
 pub async fn find_by_id(pool: &PgPool, id: Uuid) -> Result<Option<User>, sqlx::Error> {
-    let user = sqlx::query_as!(
-        User,
-        "SELECT * FROM users WHERE id = $1",
-        id
+    let user = sqlx::query_as::<_, User>(
+        "SELECT * FROM users WHERE id = $1"
     )
+    .bind(id)
     .fetch_optional(pool)
     .await?;
     Ok(user)

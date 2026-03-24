@@ -24,3 +24,4 @@ actix-web = "4.13.0"
 redis = { version = "0.27.5", features = ["tokio-comp", "aio", "connection-manager"] }
 dotenvy = "0.15.7"
 actix-cors = "0.7.1"
+bigdecimal = "0.4.10"

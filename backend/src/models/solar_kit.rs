@@ -10,7 +10,7 @@ pub struct SolarKit {
     pub device_id:              Uuid,
     pub kit_serial_number:      String,
     pub battery_percent:        i16,    
-    pub daily_rate_kobo:        String,       
+    pub daily_rate_kobo:        i64,       
     pub is_active:              bool,
     pub next_payment_due:       Option<DateTime<Utc>>,
     pub activated_at:           Option<DateTime<Utc>>,

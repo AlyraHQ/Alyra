@@ -2,7 +2,6 @@ use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use sqlx::prelude::FromRow;
 use uuid::Uuid;
-use bigdecimal::BigDecimal;
 
 #[derive(Debug, Serialize, Deserialize, PartialEq, Clone, FromRow)]
 pub struct Alert {

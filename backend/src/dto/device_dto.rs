@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+use uuid::Uuid;
 
 
 /// reg new grid meter
@@ -25,5 +26,19 @@ pub struct RegisterSolarKitRequest {
 /// device info{resp} sent to frontend dashboard
 #[derive(Debug, Serialize)]
 pub struct DeviceResponse {
-    pub 
+    pub id: Uuid,
+    pub device_name: String,
+    pub device_type: String,
+    pub status: String,
+    pub state: Option<String>,
+    pub lga: Option<String>,
+
+    //--Meter Grid--//
+    pub units_balance: Option<f64>,
+    pub tariff_naira_per_kwh: Option<f64>,
+    
+    //-- Solar Kit --//
+    pub battery_percent: Option<i16>,
+    pub is_active: Option<bool>,
+    pub next_payment_due: Option<String>,
 }

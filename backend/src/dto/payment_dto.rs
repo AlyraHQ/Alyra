@@ -20,3 +20,14 @@ pub struct InitiatePaymentResponse {
     pub reference: String,             
     pub amount_naira: f64,             
 }
+
+/// Interswitch pull webhook once payment is confirmed
+/// having "00" means txn success and mac = HMA sign verification
+#[derive(Debug, Deserialize)]
+pub struct InterswitchWebhook {
+    pub txnref: String,  
+    pub amount: String,
+    pub resp: String,                  
+    pub mac: String,                
+}
+

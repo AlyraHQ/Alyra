@@ -31,3 +31,12 @@ pub struct InterswitchWebhook {
     pub mac: String,                
 }
 
+/// Sent to client side after confirmation of payment
+/// token code in 20CHAR: XXXX XXXX XXXX XXXX XXXX
+#[derive(Debug, Serialize)]
+pub struct PaymentConfirmedResponse {
+    pub transaction_id: Uuid,
+    pub token_code: String,            
+    pub units: String,
+    pub message: String,
+}

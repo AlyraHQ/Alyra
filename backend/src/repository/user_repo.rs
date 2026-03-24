@@ -1,4 +1,4 @@
-use anyhow::Ok;
+
 use sqlx::PgPool;
 use uuid::Uuid;
 
@@ -34,5 +34,12 @@ Ok(user)
 }
 
 pub async fn find_by_id(pool: &PgPool, id: Uuid) -> Result<Option<User>, sqlx::Error> {
-
+    let user = sqlx::query_as!(
+        User,
+        "SELECT * FROM users WHERE id = $1",
+        id
+    )
+    .fetch_optional(pool)
+    .await?;
+    Ok(user)
 }

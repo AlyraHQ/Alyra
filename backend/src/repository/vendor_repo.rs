@@ -35,10 +35,25 @@ pub async fn find_by_phone(pool: &PgPool, phone: &str) -> Result<Option<Vendor>,
     Ok(vendor)
 }
 
-pub async fn find_by_id(pool: &PgPool) -> Result<Option<Vendor>, sqlx::Error> {
+pub async fn find_by_id(pool: &PgPool, id: Uuid) -> Result<Option<Vendor>, sqlx::Error> {
+    let vendor = sqlx::query_as!(
+        Vendor,
+        "SELECT * FROM vendors WHERE id = $1",
+        id
+    )
+    .fetch_optional(pool)
+    .await?;
 
+    Ok(vendor)
 }
 
 pub async fn approve(pool: &PgPool, id: Uuid) -> Result<(), sqlx::Error> {
+    sqlx::query!(
+        "UPDATE vendors SET is_approved = true WHERE id = $1",
+        id
+    )
+    .execute(pool)
+    .await?;
 
+    Ok(())
 }

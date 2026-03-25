@@ -20,3 +20,7 @@ Thumbs.db
 # Node - frontend
 node_modules/
 .next/
+
+backend/config/keys/
+*.pem
+.env

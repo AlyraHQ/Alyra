@@ -50,7 +50,7 @@ pub fn format_token_display(token_code: &str) -> String {
         .join(" ")
 }
 
-/// Saves token to database
+/// Save token to database
 pub async fn create_token(
     pool: &PgPool,
     transaction_id: Uuid,

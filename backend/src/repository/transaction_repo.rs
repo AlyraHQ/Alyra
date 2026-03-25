@@ -66,11 +66,7 @@ pub async fn find_by_reference(pool: &PgPool, interswitch_ref: &str) -> Result<O
     Ok(txn)
 }
 
-pub async fn update_status(
-    pool: &PgPool,
-    id: Uuid,
-    status: &str,
-) -> Result<(), sqlx::Error> {
+pub async fn update_status(pool: &PgPool, id: Uuid, status: &str) -> Result<(), sqlx::Error> {
     sqlx::query!(
         "UPDATE transactions SET status = $1, completed_at = NOW() WHERE id = $2",
         status,

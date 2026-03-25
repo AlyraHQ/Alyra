@@ -1,3 +1,4 @@
+use bigdecimal::BigDecimal;
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use sqlx::prelude::FromRow;
@@ -10,6 +11,6 @@ pub struct GridMeter {
     pub device_id:              Uuid,
     pub meter_number:           String,
     pub tariff_kobo_per_kwh:    i64, 
-    pub units_balance:          f64,
+    pub units_balance:          BigDecimal,
     pub last_vend_at:           Option<DateTime<Utc>>
 }

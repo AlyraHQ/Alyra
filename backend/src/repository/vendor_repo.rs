@@ -5,7 +5,12 @@ use uuid::Uuid;
 
 use crate::models::vendor::Vendor;
 
-pub async fn create(pool: &PgPool, business_name: &str, owner_name: &str, phone: &str, email: Option<&str>, cac_number: Option<&str>) -> Result<Vendor, sqlx::Error> {
+pub async fn create(pool: &PgPool, 
+    business_name: &str, 
+    owner_name: &str, 
+    phone: &str, 
+    email: Option<&str>, 
+    cac_number: Option<&str>) -> Result<Vendor, sqlx::Error> {
     let vendor = sqlx::query_as!(
         Vendor,
         "INSERT INTO vendors (business_name, owner_name, phone, email, cac_number)

@@ -1,6 +1,8 @@
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
+use crate::models::vendor::Vendor;
+
 /// Vendor registration req
 #[derive(Debug, Deserialize)]
 pub struct RegisterVendorRequest {
@@ -19,4 +21,16 @@ pub struct VendorResponse {
     pub owner_name: String,
     pub phone: String,
     pub is_approved: bool,
+}
+
+impl From<Vendor> for VendorResponse {
+    fn from(vendor: Vendor) -> Self {
+        Self {
+            id: vendor.id,
+            business_name: vendor.business_name,
+            owner_name: vendor.owner_name,
+            phone: vendor.phone,
+            is_approved: vendor.is_approved,
+        }
+    }
 }

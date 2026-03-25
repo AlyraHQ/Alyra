@@ -1,26 +1,18 @@
+use reqwest::Client;
+
+use serde::{Deserialize};
 use hmac::{Hmac, Mac};
-use serde::Deserialize;
 use sha2::Sha256;
-use reqwest::Client as HttpClient;
 
 use crate::{config::Config, errors::AppError};
 
 type HmacSha256 = Hmac<Sha256>;
 
-fn compute_hmac(key: &str, message: &str) -> String {
-    // Interswitch expects a hex-encoded HMAC-SHA256 digest.
-    let mut mac =
-        HmacSha256::new_from_slice(key.as_bytes()).expect("HMAC can take key of any size");
+pub fn compute_hmac(key: &str, message: &str) -> String {
+    let mut mac = HmacSha256::new_from_slice(key.as_bytes())
+        .expect("HMAC key error");
     mac.update(message.as_bytes());
-    let result = mac.finalize().into_bytes();
-
-    let mut out = String::with_capacity(result.len() * 2);
-    for b in result {
-        // Each byte becomes two lower-case hex chars.
-        use std::fmt::Write;
-        write!(&mut out, "{:02x}", b).expect("writing hex should not fail");
-    }
-    out
+    hex::encode(mac.finalize().into_bytes())
 }
 
 #[derive(Debug, Deserialize)]
@@ -72,7 +64,7 @@ pub fn build_payment_url(
 //--txn verification from interswitch directly--//
 pub async fn verify_transaction(
     config: &Config, txn_ref: &str, amount_kobo: i64) -> Result<PaymentStatusResponse, AppError> {
-    let client = HttpClient::new();
+    let client = Client::new();
     let hash = compute_hmac(
         &config.interswitch_mac_key, 
         &format!(
@@ -119,3 +111,4 @@ pub fn verify_webhook_signature(mac_key: &str, txn_ref: &str, amount: &str) -> b
     let _expected = compute_hmac(mac_key, &format!("{}:{}", txn_ref, amount));
     true
 }
+

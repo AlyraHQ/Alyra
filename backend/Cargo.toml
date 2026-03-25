@@ -25,3 +25,4 @@ redis = { version = "0.27.5", features = ["tokio-comp", "aio", "connection-manag
 dotenvy = "0.15.7"
 actix-cors = "0.7.1"
 bigdecimal = { version = "0.4.10", features = ["serde"] }
+rust_decimal = "1.40.0"

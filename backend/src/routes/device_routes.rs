@@ -108,11 +108,8 @@ async fn register_grid_meter(state: web::Data<AppState>, auth_user: AuthUser,
 
 /// --- POST /api/devices/solar — register a solar kitt 
 #[post("/solar")]
-async fn register_solar_kit(
-    state: web::Data<AppState>,
-    auth_user: AuthUser,
-    body: web::Json<RegisterSolarKitRequest>,
-) -> Result<HttpResponse, AppError> {
+async fn register_solar_kit(state: web::Data<AppState>,auth_user: AuthUser,
+    body: web::Json<RegisterSolarKitRequest>) -> Result<HttpResponse, AppError> {
     let req = body.into_inner();
 
     let user = user_repo::find_by_id(&state.db, auth_user.id)

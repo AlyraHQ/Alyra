@@ -56,11 +56,11 @@ pub async fn find_by_id(pool: &PgPool, id: Uuid) -> Result<Option<Device>, sqlx:
     .fetch_optional(pool)
     .await?;
 
-    
+
     Ok(device)
 }
 
 /// update device status
-pub async fn update_status(pool: &PgPool) -> Result<(), sqlx::Error> {
+pub async fn update_status(pool: &PgPool, id: Uuid, status: &str) -> Result<(), sqlx::Error> {
 
 }

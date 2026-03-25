@@ -54,10 +54,7 @@ pub async fn find_by_user(pool: &PgPool, user_id: Uuid) -> Result<Vec<Transactio
     Ok(txns)
 }
 
-pub async fn find_by_reference(
-    pool: &PgPool,
-    interswitch_ref: &str,
-) -> Result<Option<Transaction>, sqlx::Error> {
+pub async fn find_by_reference(pool: &PgPool, interswitch_ref: &str) -> Result<Option<Transaction>, sqlx::Error> {
     let txn = sqlx::query_as!(
         Transaction,
         "SELECT * FROM transactions WHERE interswitch_ref = $1",

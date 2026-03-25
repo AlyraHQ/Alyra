@@ -6,7 +6,7 @@ use sqlx::PgPool;
 
 use crate::config::Config;
 use crate::errors::AppError;
-use crate::repository::{user_repo, device_repo, transaction_repo};
+use crate::repository::{user_repo, device_repo};
 use crate::services::payment_service;
 use crate::dto::payment_dto::InitiatePaymentRequest;
 

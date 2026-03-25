@@ -28,11 +28,10 @@ pub async fn create(pool: &PgPool,
 }
 
 pub async fn find_by_phone(pool: &PgPool, phone: &str) -> Result<Option<Vendor>, sqlx::Error> {
-    let vendor = sqlx::query_as!(
-        Vendor,
+    let vendor = sqlx::query_as::<_, Vendor>(
         "SELECT * FROM vendors WHERE phone = $1",
-        phone
     )
+    .bind(phone)
     .fetch_optional(pool)
     .await?;
 

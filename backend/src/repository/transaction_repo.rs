@@ -40,10 +40,7 @@ pub async fn find_by_id(pool: &PgPool, id: Uuid) -> Result<Option<Transaction>, 
     Ok(txn)
 }
 
-pub async fn find_by_user(
-    pool: &PgPool,
-    user_id: Uuid,
-) -> Result<Vec<Transaction>, sqlx::Error> {
+pub async fn find_by_user(pool: &PgPool, user_id: Uuid) -> Result<Vec<Transaction>, sqlx::Error> {
     let txns = sqlx::query_as!(
         Transaction,
         "SELECT * FROM transactions 

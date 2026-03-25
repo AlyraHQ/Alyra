@@ -1,6 +1,8 @@
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
+use crate::models::device::Device;
+
 
 /// reg new grid meter
 #[derive(Debug, Deserialize)]
@@ -41,4 +43,24 @@ pub struct DeviceResponse {
     pub battery_percent:    Option<i16>,
     pub is_active:          Option<bool>,
     pub next_payment_due:   Option<String>,
+}
+
+//convert device model to device resp
+impl From<Device> for DeviceResponse {
+    fn from(device: Device) -> Self {
+        Self {
+            id: device.id,
+            device_name: device.device_name,
+            device_type: device.device_type,
+            status: device.status,
+            state: device.state,
+            lga: device.lga,
+           //join child table
+            units_balance: None,
+            tariff_naira_per_kwh: None,
+            battery_percent: None,
+            is_active: None,
+            next_payment_due: None,
+        }
+    }
 }

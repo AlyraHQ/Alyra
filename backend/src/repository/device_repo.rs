@@ -33,7 +33,16 @@ pub async fn create(pool: &PgPool,
 }
 
 /// find a device by user
-pub async fn find_by_user(pool: &PgPool, user_id: Uuid) -> Result<Option<Device>, sqlx::Error> {
+pub async fn find_by_user(pool: &PgPool, user_id: Uuid) -> Result<Vec<Device>, sqlx::Error> {
+    let devices = sqlx::query_as!(
+        Device,
+        "SELECT * FROM devices WHERE user_id = $1 ORDER BY created_at DESC",
+        user_id
+    )
+    .fetch_all(pool)
+    .await?;
+
+    Ok(devices)
 
 }
 

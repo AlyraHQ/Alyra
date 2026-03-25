@@ -2,7 +2,7 @@ use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use sqlx::prelude::FromRow;
 use uuid::Uuid;
-use bigdecimal::BigDecimal;
+use rust_decimal::Decimal;
 
 #[derive(Debug, Serialize, Deserialize, PartialEq, Clone, FromRow)]
 pub struct GridMeter {
@@ -10,6 +10,6 @@ pub struct GridMeter {
     pub device_id:              Uuid,
     pub meter_number:           String,
     pub tariff_kobo_per_kwh:    i64, 
-    pub units_balance:          BigDecimal, 
+    pub units_balance:          Decimal,
     pub last_vend_at:           Option<DateTime<Utc>>
 }

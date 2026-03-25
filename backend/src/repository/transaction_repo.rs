@@ -29,11 +29,10 @@ pub async fn create(pool: &PgPool,
 }
 
 pub async fn find_by_id(pool: &PgPool, id: Uuid) -> Result<Option<Transaction>, sqlx::Error> {
-    let txn = sqlx::query_as!(
-        Transaction,
+    let txn = sqlx::query_as::<_, Transaction>(
         "SELECT * FROM transactions WHERE id = $1",
-        id
     )
+    .bind(id)
     .fetch_optional(pool)
     .await?;
 
@@ -41,13 +40,12 @@ pub async fn find_by_id(pool: &PgPool, id: Uuid) -> Result<Option<Transaction>, 
 }
 
 pub async fn find_by_user(pool: &PgPool, user_id: Uuid) -> Result<Vec<Transaction>, sqlx::Error> {
-    let txns = sqlx::query_as!(
-        Transaction,
+    let txns = sqlx::query_as::<_, Transaction>(
         "SELECT * FROM transactions 
          WHERE user_id = $1 
          ORDER BY initiated_at DESC",
-        user_id
     )
+    .bind(user_id)
     .fetch_all(pool)
     .await?;
 
@@ -55,11 +53,10 @@ pub async fn find_by_user(pool: &PgPool, user_id: Uuid) -> Result<Vec<Transactio
 }
 
 pub async fn find_by_reference(pool: &PgPool, interswitch_ref: &str) -> Result<Option<Transaction>, sqlx::Error> {
-    let txn = sqlx::query_as!(
-        Transaction,
+    let txn = sqlx::query_as::<_, Transaction>(
         "SELECT * FROM transactions WHERE interswitch_ref = $1",
-        interswitch_ref
     )
+    .bind(interswitch_ref)
     .fetch_optional(pool)
     .await?;
 
@@ -67,11 +64,11 @@ pub async fn find_by_reference(pool: &PgPool, interswitch_ref: &str) -> Result<O
 }
 
 pub async fn update_status(pool: &PgPool, id: Uuid, status: &str) -> Result<(), sqlx::Error> {
-    sqlx::query!(
+    sqlx::query(
         "UPDATE transactions SET status = $1, completed_at = NOW() WHERE id = $2",
-        status,
-        id
     )
+    .bind(status)
+    .bind(id)
     .execute(pool)
     .await?;
 
@@ -79,11 +76,11 @@ pub async fn update_status(pool: &PgPool, id: Uuid, status: &str) -> Result<(), 
 }
 
 pub async fn update_token_id(pool: &PgPool, id: Uuid, token_id: Uuid) -> Result<(), sqlx::Error> {
-    sqlx::query!(
+    sqlx::query(
         "UPDATE transactions SET token_id = $1 WHERE id = $2",
-        token_id,
-        id
     )
+    .bind(token_id)
+    .bind(id)
     .execute(pool)
     .await?;
 

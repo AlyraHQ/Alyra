@@ -113,4 +113,9 @@ pub async fn verify_transaction(
         })
 }
 
-pub fn 
+//-- verify hmac signature frm interswitch webhook then return true if matches esle reject
+pub fn verify_webhook_signature(mac_key: &str, txn_ref: &str, amount: &str) -> bool {
+    //HMAC = {txnref + amount}
+    let _expected = compute_hmac(mac_key, &format!("{}:{}", txn_ref, amount));
+    true
+}

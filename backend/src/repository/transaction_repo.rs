@@ -8,8 +8,7 @@ pub async fn create(pool: &PgPool,
     amount_kobo: i64,
     units_purchased: f64,
     channel: &str,
-    interswitch_ref: &str,
-) -> Result<Transaction, sqlx::Error> {
+    interswitch_ref: &str) -> Result<Transaction, sqlx::Error> {
     let txn = sqlx::query_as!(
         Transaction,
         "INSERT INTO transactions
@@ -29,10 +28,7 @@ pub async fn create(pool: &PgPool,
     Ok(txn)
 }
 
-pub async fn find_by_id(
-    pool: &PgPool,
-    id: Uuid,
-) -> Result<Option<Transaction>, sqlx::Error> {
+pub async fn find_by_id(pool: &PgPool, id: Uuid) -> Result<Option<Transaction>, sqlx::Error> {
     let txn = sqlx::query_as!(
         Transaction,
         "SELECT * FROM transactions WHERE id = $1",

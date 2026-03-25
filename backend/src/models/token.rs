@@ -1,4 +1,4 @@
-use bigdecimal::BigDecimal;
+use rust_decimal::Decimal;
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use sqlx::prelude::FromRow;
@@ -10,7 +10,7 @@ pub struct Token {
     pub transaction_id:     Uuid,
     pub device_id:          Uuid,
     pub token_code:         String,
-    pub units:              BigDecimal,
+    pub units:              Decimal,
     pub is_used:            bool,
     pub used_at:            Option<DateTime<Utc>>,
     pub expires_at:         DateTime<Utc>,

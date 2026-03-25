@@ -1,7 +1,8 @@
 
+use bigdecimal::BigDecimal;
 use sqlx::PgPool;
 use uuid::Uuid;
-use rust_decimal::Decimal;
+
 
 use crate::models::token::Token;
 
@@ -10,7 +11,7 @@ pub async fn create(
     transaction_id: Uuid,
     device_id: Uuid,
     token_code: &str,
-    units: Decimal,
+    units: BigDecimal,
     expires_at: chrono::DateTime<chrono::Utc>,
 ) -> Result<Token, sqlx::Error> {
     sqlx::query_as::<_, Token>(

@@ -1,6 +1,7 @@
-use bigdecimal::{BigDecimal, FromPrimitive};
+
 use sqlx::PgPool;
 use uuid::Uuid;
+use rust_decimal::Decimal;
 
 use crate::models::token::Token;
 
@@ -9,28 +10,24 @@ pub async fn create(
     transaction_id: Uuid,
     device_id: Uuid,
     token_code: &str,
-    units: f64,
+    units: Decimal,
     expires_at: chrono::DateTime<chrono::Utc>,
 ) -> Result<Token, sqlx::Error> {
-    let units_bd = BigDecimal::from_f64(units).ok_or_else(|| {
-        sqlx::Error::Protocol("units is not a finite f64".into())
-    })?;
-
-    let token = sqlx::query_as::<_, Token>(
+    sqlx::query_as::<_, Token>(
         "INSERT INTO tokens
             (transaction_id, device_id, token_code, units, expires_at)
          VALUES ($1, $2, $3, $4, $5)
-         RETURNING *",
+         RETURNING *"
     )
     .bind(transaction_id)
     .bind(device_id)
     .bind(token_code)
-    .bind(units_bd)
+    .bind(units)
     .bind(expires_at)
     .fetch_one(pool)
-    .await?;
+    .await
 
-    Ok(token)
+    
 }
 
 pub async fn find_by_code(

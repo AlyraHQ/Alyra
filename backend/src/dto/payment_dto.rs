@@ -1,5 +1,8 @@
+use bigdecimal::BigDecimal;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
+
+use crate::models::transaction::Transaction;
 
 /// Frontend sends for payment intiation 
 /// Amount kobo in i64 50000 = 500Naira
@@ -39,4 +42,30 @@ pub struct PaymentConfirmedResponse {
     pub token_code: String,            
     pub units: String,
     pub message: String,
+}
+
+#[derive(Debug, Serialize)]
+pub struct TransactionResponse {
+    pub id: Uuid,
+    pub amount_kobo: i64,
+    pub amount_naira: f64,
+    pub units_purchased: BigDecimal,
+    pub channel: String,
+    pub status: String,
+    pub initiated_at: String,
+}
+
+/// Converts Txn model to TxnResp DTO
+impl From<Transaction> for TransactionResponse {
+    fn from(txn: Transaction) -> Self {
+        Self {
+            id: txn.id,
+            amount_kobo: txn.amount_kobo,
+            amount_naira: txn.amount_kobo as f64 / 100.0,
+            units_purchased: txn.units_purchased,
+            channel: txn.channel,
+            status: txn.status,
+            initiated_at: txn.initiated_at.to_rfc3339(),
+        }
+    }
 }

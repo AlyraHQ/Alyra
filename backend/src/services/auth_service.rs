@@ -1,4 +1,6 @@
 use bcrypt::{hash, verify};
+use chrono::{Duration, Utc};
+use jsonwebtoken::{DecodingKey, EncodingKey, Header, Validation, decode, encode};
 use serde::{Deserialize, Serialize};
 use sqlx::PgPool;
 
@@ -59,7 +61,7 @@ pub async fn login(
 
     //verify PIN - bcrypt hash
     let valid = verify(&req.pin, &user.pin_hash)
-    .map_err(|_| AppError::InternalError("PIN verification failed!! ".to_string()))?
+    .map_err(|_| AppError::InternalError("PIN verification failed!! ".to_string()))?;
 
     if !valid {
         return Err(AppError::Unauthorized("Invalid phone / PIN".to_string()));
@@ -89,4 +91,33 @@ pub async fn login(
     })
 }
 
-pub fn generate_token
+pub fn generate_token(
+    user_id: &str, 
+    phone: &str, 
+    expiry_secs: i64, 
+    private_key: &str) -> Result<String, AppError> {
+    let now = Utc::now();
+    let claims = Claims {
+        sub: user_id.to_string(),
+        phone: phone.to_string(),
+        exp: (now + Duration::seconds(expiry_secs)).timestamp(),
+        iat: now.timestamp(),
+    };
+
+    encode(&Header::default(), &claims, &EncodingKey::from_secret(private_key.as_bytes()),
+)
+.map_err(|_| AppError::InternalError("Generation of Token failed".to_string()))
+}
+
+pub fn verify_token(token: &str, public_key: &str) -> Result<Claims, AppError> {
+    let mut validation = Validation::new(jsonwebtoken::Algorithm::HS256);
+    validation.validate_exp = true;
+
+    decode::<Claims>(
+        token,
+        &DecodingKey::from_secret(public_key.as_bytes()),
+        &validation,
+    )
+    .map(|data| data.claims)
+    .map_err(|_| AppError::Unauthorized("Invalid or expired token".to_string()))
+}

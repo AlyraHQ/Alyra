@@ -8,9 +8,9 @@ use rust_decimal::Decimal;
 pub struct ConsumptionLog {
     pub id:                        Uuid,
     pub device_id:                 Uuid,
-    pub units_remaining:            Decimal,
-    pub previous_reading:           Option<Decimal>,
-    pub consumption_rate:           Option<Decimal>,
+    pub units_remaining:           Decimal,
+    pub previous_reading:          Option<Decimal>,
+    pub consumption_rate:          Option<Decimal>,
     pub reading_trigger:           String,
     pub recorded_at:               DateTime<Utc>
 }

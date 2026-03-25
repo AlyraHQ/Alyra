@@ -48,6 +48,8 @@ pub enum AppError {
     #[error("Internal server error: {0}")]
     Internal(String),
 
+    #[error("Internal Error {0}")]
+    InternalError(String)
 
 }
 
@@ -62,7 +64,8 @@ impl ResponseError for AppError {
             AppError::Forbidden(_)             => StatusCode::FORBIDDEN,              
             AppError::BadRequest(_)            => StatusCode::BAD_REQUEST,            
             AppError::ValidationError(_)       => StatusCode::UNPROCESSABLE_ENTITY,   
-            AppError::Conflict(_)              => StatusCode::CONFLICT,               
+            AppError::Conflict(_)              => StatusCode::CONFLICT,            
+            AppError::InternalError(_)         => StatusCode::INTERNAL_SERVER_ERROR,   
             AppError::PaymentError(_)          => StatusCode::PAYMENT_REQUIRED,       
             AppError::InvalidWebhookSignature  => StatusCode::UNAUTHORIZED,           
             AppError::DatabaseError(_)         => StatusCode::INTERNAL_SERVER_ERROR,  
@@ -113,6 +116,7 @@ impl AppError {
             AppError::BadRequest(_)            => "BAD_REQUEST",
             AppError::ValidationError(_)       => "VALIDATION_ERROR",
             AppError::Conflict(_)              => "CONFLICT",
+            AppError::InternalError(_)         => "INTERNAL_ERROR",
             AppError::PaymentError(_)          => "PAYMENT_ERROR",
             AppError::InvalidWebhookSignature  => "INVALID_SIGNATURE",
             AppError::DatabaseError(_)         => "DATABASE_ERROR",

@@ -10,19 +10,18 @@ pub async fn create(pool: &PgPool,
     units_purchased: BigDecimal,
     channel: &str,
     interswitch_ref: &str) -> Result<Transaction, sqlx::Error> {
-    let txn = sqlx::query_as!(
-        Transaction,
+    let txn = sqlx::query_as::<_, Transaction>(
         "INSERT INTO transactions
             (user_id, device_id, amount_kobo, units_purchased, channel, interswitch_ref)
          VALUES ($1, $2, $3, $4, $5, $6)
          RETURNING *",
-        user_id,
-        device_id,
-        amount_kobo,
-        units_purchased,
-        channel,
-        interswitch_ref,
     )
+    .bind(user_id)
+    .bind(device_id)
+    .bind(amount_kobo)
+    .bind(units_purchased)
+    .bind(channel)
+    .bind(interswitch_ref)
     .fetch_one(pool)
     .await?;
 

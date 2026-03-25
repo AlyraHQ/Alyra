@@ -1,6 +1,7 @@
 use sqlx::PgPool;
 use uuid::Uuid;
 use bigdecimal::BigDecimal;
+use bigdecimal::ToPrimitive;
 
 use crate::{config::Config, dto::payment_dto::{InitiatePaymentRequest, InitiatePaymentResponse, InterswitchWebhook, PaymentConfirmedResponse}, errors::AppError, repository::{device_repo, transaction_repo, user_repo}, services::{interswitch, sms_service, token_service}};
 
@@ -73,7 +74,7 @@ pub async fn handle_webhook(
     }
 
     //-- find txn by interswitch ref--//
-    let transaction = transaction_repo::find_by_reference(pool, &webhook.txnrefb)
+    let transaction = transaction_repo::find_by_reference(pool, &webhook.txnref)
     .await
     .map_err(AppError::DatabaseError)?
     .ok_or_else(|| AppError::NotFound("Transaction not found".to_string()))?;
@@ -86,7 +87,8 @@ pub async fn handle_webhook(
     }
 
     //--verify directly with interswtch double confirmation--//
-    let verification = interswitch::verify_transaction(config, &webhook.txn_ref, transaction.amount_kobo).await?;
+    let verification =
+        interswitch::verify_transaction(config, &webhook.txnref, transaction.amount_kobo).await?;
 
     //success in interswitch response codes
     if verification.response_code != "00" {
@@ -110,7 +112,7 @@ pub async fn handle_webhook(
         &config.token_secret_key,
         &transaction.device_id,
         &transaction.id,
-        transaction.units_purchased,
+        &transaction.units_purchased,
     )?;
 
     //save token to database
@@ -119,7 +121,7 @@ pub async fn handle_webhook(
         transaction.id,
         transaction.device_id,
         &token_code,
-        transaction.units_purchased,
+        transaction.units_purchased.clone(),
     ).await?;
 
     //update txn to success and token link
@@ -133,7 +135,10 @@ pub async fn handle_webhook(
 
     // Format token for display and SMS
     let formatted = token_service::format_token_display(&token_code);
-    let units_display = format!("{:.2} units", transaction.units_purchased);
+    let units_display = match transaction.units_purchased.to_i64() {
+        Some(u) => format!("{:.2} units", u),
+        None => format!("{} units", transaction.units_purchased),
+    };
 
     // Send SMS - payment succeeds even if SMS fails
     tokio::spawn({

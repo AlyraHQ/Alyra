@@ -3,6 +3,7 @@ use sha2::Sha256;
 use uuid::Uuid;
 use chrono::{Utc, Duration};
 use sqlx::PgPool;
+use bigdecimal::BigDecimal;
 
 use crate::errors::AppError;
 use crate::models::token::Token;
@@ -15,13 +16,13 @@ pub fn generate_token_code(
     secret_key: &str,
     device_id: &Uuid,
     transaction_id: &Uuid,
-    units: f64,
+    units: &BigDecimal,
 ) -> Result<String, AppError> {
     let mut mac = HmacSha256::new_from_slice(secret_key.as_bytes())
         .map_err(|_| AppError::InternalError("Token engine init failed".to_string()))?;
 
     // Message = device + transaction + units — unique per payment
-    let message = format!("{}:{}:{:.4}", device_id, transaction_id, units);
+    let message = format!("{}:{}:{}", device_id, transaction_id, units);
     mac.update(message.as_bytes());
 
     let result = mac.finalize().into_bytes();
@@ -55,7 +56,7 @@ pub async fn create_token(
     transaction_id: Uuid,
     device_id: Uuid,
     token_code: &str,
-    units: f64,
+    units: BigDecimal,
 ) -> Result<Token, AppError> {
     let expires_at = Utc::now() + Duration::days(90);
 

@@ -2,7 +2,7 @@ use sqlx::PgPool;
 use uuid::Uuid;
 use bigdecimal::BigDecimal;
 
-use crate::{config::Config, dto::payment_dto::{InitiatePaymentRequest, InitiatePaymentResponse, InterswitchWebhook, PaymentConfirmedResponse}, errors::AppError, repository::{device_repo, transaction_repo}, services::interswitch};
+use crate::{config::Config, dto::payment_dto::{InitiatePaymentRequest, InitiatePaymentResponse, InterswitchWebhook, PaymentConfirmedResponse}, errors::AppError, repository::{device_repo, transaction_repo, user_repo}, services::{interswitch, sms_service, token_service}};
 
 
 pub async fn initiate_payment(
@@ -73,7 +73,104 @@ pub async fn handle_webhook(
     }
 
     //-- find txn by interswitch ref--//
+    let transaction = transaction_repo::find_by_reference(pool, &webhook.txnrefb)
+    .await
+    .map_err(AppError::DatabaseError)?
+    .ok_or_else(|| AppError::NotFound("Transaction not found".to_string()))?;
+
+    //--prevents double token generation--//
+    if transaction.status == "success" {
+        return Err(AppError::Conflict(
+            "Transaction already processed".to_string(),
+        ));
+    }
+
+    //--verify directly with interswtch double confirmation--//
+    let verification = interswitch::verify_transaction(config, &webhook.txn_ref, transaction.amount_kobo).await?;
+
+    //success in interswitch response codes
+    if verification.response_code != "00" {
+        transaction_repo::update_status(pool, transaction.id, "failed")
+        .await
+        .map_err(AppError::DatabaseError)?;
+
+    tracing::warn!(
+        "Payment failed for {}: {}",
+        webhook.txnref,
+        verification.response_description
+    );
+
+    return Err(AppError::Conflict(format!(
+        "Payment failed: {}",
+        verification.response_description
+    )));
 }
+    //generate 20 token
+    let token_code = token_service::generate_token_code(
+        &config.token_secret_key,
+        &transaction.device_id,
+        &transaction.id,
+        transaction.units_purchased,
+    )?;
+
+    //save token to database
+    let token = token_service::create_token(
+        pool,
+        transaction.id,
+        transaction.device_id,
+        &token_code,
+        transaction.units_purchased,
+    ).await?;
+
+    //update txn to success and token link
+    transaction_repo::update_status(pool, transaction.id, "success")
+    .await
+    .map_err(AppError::DatabaseError)?;
+
+    transaction_repo::update_token_id(pool, transaction.id, token.id)
+    .await
+    .map_err(AppError::DatabaseError)?;
+
+    // Format token for display and SMS
+    let formatted = token_service::format_token_display(&token_code);
+    let units_display = format!("{:.2} units", transaction.units_purchased);
+
+    // Send SMS - payment succeeds even if SMS fails
+    tokio::spawn({
+        let pool = pool.clone();
+        let config = config.clone();
+        let device_id = transaction.device_id;
+        let token_display = formatted.clone();
+        let units = units_display.clone();
+
+        async move {
+            if let Ok(Some(device)) = device_repo::find_by_id(&pool, device_id).await {
+                if let Ok(Some(user)) = user_repo::find_by_id(&pool, device.user_id).await {
+                    let msg = format!(
+                        "Alyra Token: {}\nUnits: {}\nEnter on your meter. Valid 90 days.",
+                        token_display, units
+                    );
+                    let _ = sms_service::send_sms(&config, &user.phone, &msg).await;
+                }
+            }
+        }
+    });
+
+    tracing::info!(
+        "Payment successful: {} — token generated for device {}",
+        webhook.txnref,
+        transaction.device_id
+    );
+
+    Ok(PaymentConfirmedResponse {
+        transaction_id: transaction.id,
+        token_code: formatted,
+        units: units_display,
+        message: "Payment confirmed. Enter token on your meter.".to_string(),
+    })
+}
+
+
 
 //Energy units supllied calcu per kobo
 fn calculate_units(device_type: &str, amount_kobo: i64) -> BigDecimal {

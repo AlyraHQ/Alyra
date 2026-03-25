@@ -46,11 +46,10 @@ pub async fn find_by_user(pool: &PgPool, user_id: Uuid) -> Result<Vec<Device>, s
 
 /// find a device by id
 pub async fn find_by_id(pool: &PgPool, id: Uuid) -> Result<Option<Device>, sqlx::Error> {
-    let device = sqlx::query_as!(
-        Device,
+    let device = sqlx::query_as::<_, Device>(
         "SELECT * FROM devices WHERE id = $1",
-        id
     )
+    .bind(id)
     .fetch_optional(pool)
     .await?;
 

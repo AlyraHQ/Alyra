@@ -1,3 +1,4 @@
+use bigdecimal::BigDecimal;
 use sqlx::PgPool;
 use uuid::Uuid;
 use crate::models::transaction::Transaction;
@@ -6,7 +7,7 @@ pub async fn create(pool: &PgPool,
     user_id: Uuid,
     device_id: Uuid,
     amount_kobo: i64,
-    units_purchased: f64,
+    units_purchased: BigDecimal,
     channel: &str,
     interswitch_ref: &str) -> Result<Transaction, sqlx::Error> {
     let txn = sqlx::query_as!(
@@ -18,7 +19,7 @@ pub async fn create(pool: &PgPool,
         user_id,
         device_id,
         amount_kobo,
-        units_purchased as f64,
+        units_purchased,
         channel,
         interswitch_ref,
     )

@@ -49,7 +49,10 @@ pub enum AppError {
     Internal(String),
 
     #[error("Internal Error {0}")]
-    InternalError(String)
+    InternalError(String),
+
+    #[error("External service error: {0}")]
+    ExternalServiceError(String),
 
 }
 
@@ -71,6 +74,7 @@ impl ResponseError for AppError {
             AppError::DatabaseError(_)         => StatusCode::INTERNAL_SERVER_ERROR,  
             AppError::RedisError(_)            => StatusCode::INTERNAL_SERVER_ERROR,  
             AppError::Internal(_)              => StatusCode::INTERNAL_SERVER_ERROR,  
+            AppError::ExternalServiceError(_) => StatusCode::BAD_GATEWAY,
         }
     }
 
@@ -89,6 +93,10 @@ impl ResponseError for AppError {
             AppError::Internal(e) => {
                 tracing::error!("Internal error: {:?}", e);
                 "An internal error occurred, try again.".to_string()
+            }
+            AppError::ExternalServiceError(e) => {
+                tracing::error!("External error: {:?}", e);
+                "An external error occured, try again".to_string()
             }
             other => other.to_string(),
         };
@@ -122,6 +130,7 @@ impl AppError {
             AppError::DatabaseError(_)         => "DATABASE_ERROR",
             AppError::RedisError(_)            => "CACHE_ERROR",
             AppError::Internal(_)              => "INTERNAL_ERROR",
+            AppError::ExternalServiceError(_) => "EXTERNAL_SERVICE_ERROR",
         }
     }
 }

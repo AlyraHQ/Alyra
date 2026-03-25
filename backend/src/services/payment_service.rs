@@ -1,5 +1,6 @@
 use sqlx::PgPool;
 use uuid::Uuid;
+use bigdecimal::BigDecimal;
 
 use crate::{config::Config, dto::payment_dto::{InitiatePaymentRequest, InitiatePaymentResponse}, errors::AppError, repository::{device_repo, transaction_repo}, services::interswitch};
 
@@ -31,7 +32,7 @@ pub async fn initiate_payment(
         req.device_id, 
         req.amount_kobo, 
         units, 
-        req.channel, 
+        &req.channel, 
         &txn_ref)
         .await
         .map_err(AppError::DatabaseError)?;
@@ -56,11 +57,12 @@ pub async fn initiate_payment(
 }
 
 //Energy units supllied calcu per kobo
-fn calculate_units(device_type: &str, amount_kobo: i64) -> f64 {
+fn calculate_units(device_type: &str, amount_kobo: i64) -> BigDecimal {
     match device_type {
-        "grid" => amount_kobo as f64 /8500.0, //--this N85naira per kwh
-        "solar" => amount_kobo as f64 /20000.0, //--this N200 per day
-        _ => 0.0,
+        // Note: this is a simple ratio converting kobo amount into "energy units".
+        "grid" => BigDecimal::from(amount_kobo) / BigDecimal::from(8500i64), //-- this N85naira per kwh
+        "solar" => BigDecimal::from(amount_kobo) / BigDecimal::from(20000i64), //-- this N200 per day
+        _ => BigDecimal::from(0),
         
     }
 }

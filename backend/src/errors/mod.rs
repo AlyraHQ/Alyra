@@ -47,6 +47,8 @@ pub enum AppError {
     /// Catch-all for unexpected failures
     #[error("Internal server error: {0}")]
     Internal(String),
+
+
 }
 
 pub type AppResult<T> = Result<T, AppError>;

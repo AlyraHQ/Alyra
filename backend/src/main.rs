@@ -26,7 +26,7 @@ async fn main()-> anyhow::Result<()> {
     tracing_subscriber::registry()
     .with(
         tracing_subscriber::EnvFilter::try_from_default_env()
-        .unwrap_or_else(|_| "alyra=debug, actix_web=info".into()),
+        .unwrap_or_else(|_| "alyra=debug,actix_web=info".into()),
     )
     .with(tracing_subscriber::fmt::layer())
     .init();
@@ -64,7 +64,12 @@ info!("....hold Backend services starting");
         .wrap(cors)
         .wrap(Logger::default())
         //--- add route ---//
-        // .configure(routes::auth_routes::configure)
+        .configure(routes::health_routes::configure)
+        .configure(routes::auth_routes::configure)
+        .configure(routes::payment_routes::configure)
+        .configure(routes::device_routes::configure)
+        .configure(routes::ussd_routes::configure)
+        .configure(routes::vendor_routes::configure)
     })
     .bind(&bind_addy)?
     .workers(4)

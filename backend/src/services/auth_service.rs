@@ -27,4 +27,17 @@ pub async fn register(pool: &PgPool,
     //never stop Hash Pin as plain text
     let pin_hash = hash(&req.pin, config.bcrypt_cost)
     .map_err(|_| AppError::InternalError("PIN failed to hash".to_string()))?;
+
+    //create new user in db
+    let user = user_repo::create(
+        pool, 
+        &req.phone, 
+        &pin_hash, 
+        req.full_name.as_deref(),
+        req.email.as_deref(),
+        req.state.as_deref(),
+        req.lga.as_deref(),
+    ).await.map_err(|e| AppError::DatabaseError(e))?;
+    
+    Ok(user_)
 }

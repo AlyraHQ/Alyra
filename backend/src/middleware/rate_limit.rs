@@ -35,3 +35,23 @@ where
 pub struct RateLimiterMiddleware<S> {
     service: Rc<S>,
 }
+
+impl<S, B> Service<ServiceRequest> for RateLimiterMiddleware<S>
+where
+    S: Service<ServiceRequest, Response = ServiceResponse<B>, Error = Error> + 'static,
+    B: 'static,
+{
+    type Response = ServiceResponse<EitherBody<B>>;
+    type Error = Error;
+    type Future = LocalBoxFuture<'static, Result<Self::Response, Self::Error>>;
+
+    forward_ready!(service);
+
+    fn call(&self, req: ServiceRequest) -> Self::Future {
+        let service = self.service.clone();
+        Box::pin(async move {
+            let res = service.call(req).await?;
+            Ok(res.map_into_left_body())
+        })
+    }
+}

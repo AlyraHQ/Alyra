@@ -17,7 +17,7 @@ pub async fn create(pool: &PgPool,
 }
 
 /// find a device by user
-pub async fn find_by_user(pool: &PgPool, user: &str) -> Result<Option<Device>, sqlx::Error> {
+pub async fn find_by_user(pool: &PgPool, user_id: Uuid) -> Result<Option<Device>, sqlx::Error> {
 
 }
 
@@ -25,5 +25,8 @@ pub async fn find_by_user(pool: &PgPool, user: &str) -> Result<Option<Device>, s
 pub async fn find_by_id(pool: &PgPool, id: Uuid) -> Result<Option<Device>, sqlx::Error> {
 
 }
+
 /// update device status
-pub async fn update_status(pool: &PgPool) -> 
+pub async fn update_status(pool: &PgPool) -> Result<(), sqlx::Error> {
+
+}

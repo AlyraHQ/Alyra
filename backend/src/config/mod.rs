@@ -18,11 +18,15 @@ pub struct Config {
     pub jwt_access_expiry_secs: i64,
     pub jwt_refresh_expiry_secs: i64,
 
-    //interswitch
+    
+    // Interswitch
     pub interswitch_merchant_code: String,
     pub interswitch_pay_item_id: String,
+    pub interswitch_client_id: String,
+    pub interswitch_secret_key: String,
     pub interswitch_mac_key: String,
     pub interswitch_base_url: String,
+    pub interswitch_data_ref: String,
 
     //bcrypt
     pub bcrypt_cost: u32,

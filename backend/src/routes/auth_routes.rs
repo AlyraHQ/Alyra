@@ -19,10 +19,7 @@ pub fn configure(cfg: &mut web::ServiceConfig) {
 
 /// --- POST /api/auth/register
 #[post("/register")]
-async fn register(
-    state: web::Data<AppState>,
-    body: web::Json<RegisterRequest>,
-) -> Result<HttpResponse, AppError> {
+async fn register(state: web::Data<AppState>, body: web::Json<RegisterRequest>) -> Result<HttpResponse, AppError> {
     let user = auth_service::register(
         &state.db,
         &state.config,
@@ -37,10 +34,7 @@ async fn register(
 
 /// --- POST /api/auth/login
 #[post("/login")]
-async fn login(
-    state: web::Data<AppState>,
-    body: web::Json<LoginRequest>,
-) -> Result<HttpResponse, AppError> {
+async fn login(state: web::Data<AppState>, body: web::Json<LoginRequest>) -> Result<HttpResponse, AppError> {
     let tokens = auth_service::login(
         &state.db,
         &state.config,
@@ -55,10 +49,7 @@ async fn login(
 
 /// --- GET /api/auth/me  — requires JWT Auth here !!!!!
 #[get("/me")]
-async fn me(
-    state: web::Data<AppState>,
-    auth_user: AuthUser,
-) -> Result<HttpResponse, AppError> {
+async fn me(state: web::Data<AppState>, auth_user: AuthUser) -> Result<HttpResponse, AppError> {
     let user = crate::repository::user_repo::find_by_id(
         &state.db,
         auth_user.id,

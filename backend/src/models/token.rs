@@ -1,4 +1,5 @@
 
+use bigdecimal::BigDecimal;
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use sqlx::prelude::FromRow;
@@ -10,7 +11,7 @@ pub struct Token {
     pub transaction_id:     Uuid,
     pub device_id:          Uuid,
     pub token_code:         String,
-    pub units:              f64,
+    pub units:              BigDecimal,
     pub is_used:            bool,
     pub used_at:            Option<DateTime<Utc>>,
     pub expires_at:         DateTime<Utc>,

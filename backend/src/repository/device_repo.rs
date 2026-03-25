@@ -62,5 +62,11 @@ pub async fn find_by_id(pool: &PgPool, id: Uuid) -> Result<Option<Device>, sqlx:
 
 /// update device status
 pub async fn update_status(pool: &PgPool, id: Uuid, status: &str) -> Result<(), sqlx::Error> {
+    sqlx::query!(
+        "UPDATE devices SET status = $1 WHERE id = $2",
+        status,
+        id
+    ).execute(pool).await?;
 
+    Ok(())
 }

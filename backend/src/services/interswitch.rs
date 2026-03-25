@@ -1,5 +1,5 @@
 use reqwest::Client;
-
+use hex;
 use serde::{Deserialize};
 use hmac::{Hmac, Mac};
 use sha2::Sha256;

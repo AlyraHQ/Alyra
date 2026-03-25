@@ -78,11 +78,7 @@ pub async fn update_status(pool: &PgPool, id: Uuid, status: &str) -> Result<(), 
     Ok(())
 }
 
-pub async fn update_token_id(
-    pool: &PgPool,
-    id: Uuid,
-    token_id: Uuid,
-) -> Result<(), sqlx::Error> {
+pub async fn update_token_id(pool: &PgPool, id: Uuid, token_id: Uuid) -> Result<(), sqlx::Error> {
     sqlx::query!(
         "UPDATE transactions SET token_id = $1 WHERE id = $2",
         token_id,

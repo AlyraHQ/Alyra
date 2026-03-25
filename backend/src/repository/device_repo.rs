@@ -9,10 +9,26 @@ pub async fn create(pool: &PgPool,
     vendor_id: Uuid, 
     device_name: &str, 
     device_type: &str, 
-    status: &str, 
     state: Option<&str>, 
     lga: Option<&str>, 
     address: Option<&str>) -> Result<Device, sqlx::Error> {
+    let device = sqlx::query_as!(
+        Device,
+        "INSERT INTO devices (user_id, vendor_id, device_name, device_type, state, lga, address)
+        VALUES($1, $2, $3, $4, $5, $6, $7)
+        RETURNING *",
+        user_id, 
+        vendor_id, 
+        device_name, 
+        device_type,
+        state, 
+        lga, 
+        address
+    )
+    .fetch_one(pool)
+    .await?;
+
+    Ok(device)
 
 }
 

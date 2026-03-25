@@ -2,7 +2,7 @@ use sqlx::PgPool;
 use uuid::Uuid;
 use bigdecimal::BigDecimal;
 
-use crate::{config::Config, dto::payment_dto::{InitiatePaymentRequest, InitiatePaymentResponse}, errors::AppError, repository::{device_repo, transaction_repo}, services::interswitch};
+use crate::{config::Config, dto::payment_dto::{InitiatePaymentRequest, InitiatePaymentResponse, InterswitchWebhook, PaymentConfirmedResponse}, errors::AppError, repository::{device_repo, transaction_repo}, services::interswitch};
 
 
 pub async fn initiate_payment(
@@ -54,6 +54,25 @@ pub async fn initiate_payment(
         reference: txn_ref, 
         amount_naira: req.amount_kobo as f64 / 100.0
     })
+}
+
+//verify + confirm + generate token + sms -- inteswitch webhook
+pub async fn handle_webhook(
+    pool: &PgPool, config: &Config, 
+    webhook: InterswitchWebhook) -> Result<PaymentConfirmedResponse, AppError> {
+    //verify HMAC sign then if forged kindly reject
+    let valid = interswitch::verify_webhook_signature(
+        &config.interswitch_mac_key, 
+        &webhook.txnref, 
+        &webhook.amount,
+    );
+
+    if !valid {
+        tracing::warn!("Rejected webhook with invalid forged signature: {}", webhook.txnref);
+        return Err(AppError::Unauthorized("Invalid webhook signature".to_string()));
+    }
+
+    //-- find txn by interswitch ref--//
 }
 
 //Energy units supllied calcu per kobo

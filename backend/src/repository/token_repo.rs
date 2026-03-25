@@ -1,5 +1,7 @@
+use bigdecimal::{BigDecimal, FromPrimitive};
 use sqlx::PgPool;
 use uuid::Uuid;
+
 use crate::models::token::Token;
 
 pub async fn create(
@@ -10,18 +12,21 @@ pub async fn create(
     units: f64,
     expires_at: chrono::DateTime<chrono::Utc>,
 ) -> Result<Token, sqlx::Error> {
-    let token = sqlx::query_as!(
-        Token,
+    let units_bd = BigDecimal::from_f64(units).ok_or_else(|| {
+        sqlx::Error::Protocol("units is not a finite f64".into())
+    })?;
+
+    let token = sqlx::query_as::<_, Token>(
         "INSERT INTO tokens
             (transaction_id, device_id, token_code, units, expires_at)
          VALUES ($1, $2, $3, $4, $5)
          RETURNING *",
-        transaction_id,
-        device_id,
-        token_code,
-        units as f64,
-        expires_at,
     )
+    .bind(transaction_id)
+    .bind(device_id)
+    .bind(token_code)
+    .bind(units_bd)
+    .bind(expires_at)
     .fetch_one(pool)
     .await?;
 
@@ -32,11 +37,10 @@ pub async fn find_by_code(
     pool: &PgPool,
     token_code: &str,
 ) -> Result<Option<Token>, sqlx::Error> {
-    let token = sqlx::query_as!(
-        Token,
+    let token = sqlx::query_as::<_, Token>(
         "SELECT * FROM tokens WHERE token_code = $1",
-        token_code
     )
+    .bind(token_code)
     .fetch_optional(pool)
     .await?;
 
@@ -44,11 +48,10 @@ pub async fn find_by_code(
 }
 
 pub async fn find_by_id(pool: &PgPool, id: Uuid) -> Result<Option<Token>, sqlx::Error> {
-    let token = sqlx::query_as!(
-        Token,
+    let token = sqlx::query_as::<_, Token>(
         "SELECT * FROM tokens WHERE id = $1",
-        id
     )
+    .bind(id)
     .fetch_optional(pool)
     .await?;
 
@@ -56,10 +59,10 @@ pub async fn find_by_id(pool: &PgPool, id: Uuid) -> Result<Option<Token>, sqlx::
 }
 
 pub async fn mark_as_used(pool: &PgPool, id: Uuid) -> Result<(), sqlx::Error> {
-    sqlx::query!(
+    sqlx::query(
         "UPDATE tokens SET is_used = true, used_at = NOW() WHERE id = $1",
-        id
     )
+    .bind(id)
     .execute(pool)
     .await?;
 

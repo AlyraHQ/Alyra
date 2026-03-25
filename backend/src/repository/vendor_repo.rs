@@ -11,17 +11,16 @@ pub async fn create(pool: &PgPool,
     phone: &str, 
     email: Option<&str>, 
     cac_number: Option<&str>) -> Result<Vendor, sqlx::Error> {
-    let vendor = sqlx::query_as!(
-        Vendor,
+    let vendor = sqlx::query_as::<_, Vendor>(
         "INSERT INTO vendors (business_name, owner_name, phone, email, cac_number)
         VALUES ($1, $2, $3, $4, $5)
         RETURNING *",
-        business_name, 
-        owner_name, 
-        phone, 
-        email, 
-        cac_number
     )
+    .bind(business_name)
+    .bind(owner_name)
+    .bind(phone)
+    .bind(email)
+    .bind(cac_number)
     .fetch_one(pool)
     .await?;
 
@@ -41,11 +40,10 @@ pub async fn find_by_phone(pool: &PgPool, phone: &str) -> Result<Option<Vendor>,
 }
 
 pub async fn find_by_id(pool: &PgPool, id: Uuid) -> Result<Option<Vendor>, sqlx::Error> {
-    let vendor = sqlx::query_as!(
-        Vendor,
+    let vendor = sqlx::query_as::<_, Vendor>(
         "SELECT * FROM vendors WHERE id = $1",
-        id
     )
+    .bind(id)
     .fetch_optional(pool)
     .await?;
 
@@ -53,10 +51,10 @@ pub async fn find_by_id(pool: &PgPool, id: Uuid) -> Result<Option<Vendor>, sqlx:
 }
 
 pub async fn approve(pool: &PgPool, id: Uuid) -> Result<(), sqlx::Error> {
-    sqlx::query!(
+    sqlx::query(
         "UPDATE vendors SET is_approved = true WHERE id = $1",
-        id
     )
+    .bind(id)
     .execute(pool)
     .await?;
 

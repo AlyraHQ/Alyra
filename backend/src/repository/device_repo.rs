@@ -12,19 +12,18 @@ pub async fn create(pool: &PgPool,
     state: Option<&str>, 
     lga: Option<&str>, 
     address: Option<&str>) -> Result<Device, sqlx::Error> {
-    let device = sqlx::query_as!(
-        Device,
+    let device = sqlx::query_as::<_, Device>(
         "INSERT INTO devices (user_id, vendor_id, device_name, device_type, state, lga, address)
         VALUES($1, $2, $3, $4, $5, $6, $7)
         RETURNING *",
-        user_id, 
-        vendor_id, 
-        device_name, 
-        device_type,
-        state, 
-        lga, 
-        address
     )
+    .bind(user_id)
+    .bind(vendor_id)
+    .bind(device_name)
+    .bind(device_type)
+    .bind(state)
+    .bind(lga)
+    .bind(address)
     .fetch_one(pool)
     .await?;
 
@@ -34,11 +33,10 @@ pub async fn create(pool: &PgPool,
 
 /// find a device by user
 pub async fn find_by_user(pool: &PgPool, user_id: Uuid) -> Result<Vec<Device>, sqlx::Error> {
-    let devices = sqlx::query_as!(
-        Device,
+    let devices = sqlx::query_as::<_, Device>(
         "SELECT * FROM devices WHERE user_id = $1 ORDER BY created_at DESC",
-        user_id
     )
+    .bind(user_id)
     .fetch_all(pool)
     .await?;
 
@@ -62,11 +60,13 @@ pub async fn find_by_id(pool: &PgPool, id: Uuid) -> Result<Option<Device>, sqlx:
 
 /// update device status
 pub async fn update_status(pool: &PgPool, id: Uuid, status: &str) -> Result<(), sqlx::Error> {
-    sqlx::query!(
+    sqlx::query(
         "UPDATE devices SET status = $1 WHERE id = $2",
-        status,
-        id
-    ).execute(pool).await?;
+    )
+    .bind(status)
+    .bind(id)
+    .execute(pool)
+    .await?;
 
     Ok(())
 }

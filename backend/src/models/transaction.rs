@@ -1,4 +1,4 @@
-use rust_decimal::Decimal;
+
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use sqlx::prelude::FromRow;
@@ -10,7 +10,7 @@ pub struct Transaction {
     pub user_id:            Uuid,
     pub device_id:          Uuid,
     pub amount_kobo:        i64,
-    pub units_purchased:    Decimal,
+    pub units_purchased:    f64,
     pub channel:            String,
     pub status:             String,
     pub interswitch_ref:    Option<String>,

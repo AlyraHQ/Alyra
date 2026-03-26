@@ -19,6 +19,7 @@ pub fn configure(cfg: &mut web::ServiceConfig) {
             .service(register_grid_meter)
             .service(register_solar_kit)
             .service(get_device)
+            .service(get_prediction)
     );
 }
 
@@ -150,4 +151,40 @@ async fn register_solar_kit(state: web::Data<AppState>,auth_user: AuthUser,
         "success": true,
         "data": DeviceResponse::from(device)
     })))
+}
+
+//prediction endpoint 
+#[get("/{id}/prediction")]
+async fn get_prediction(
+    state: web::Data<AppState>,
+    auth_user: AuthUser,
+    path: web::Path<uuid::Uuid>,
+) -> Result<HttpResponse, AppError> {
+    let device_id = path.into_inner();
+
+    let prediction = crate::services::prediction_service::predict_depletion(
+        &state.db,
+        device_id,
+    ).await?;
+
+    match prediction {
+        Some(p) => Ok(HttpResponse::Ok().json(json!({
+            "success": true,
+            "data": {
+                "device_id": p.device_id,
+                "units_remaining": p.units_remaining,
+                "consumption_rate_per_hour": p.consumption_rate_per_hour,
+                "hours_until_empty": p.hours_until_empty,
+                "predicted_depletion_time": p.predicted_depletion_time,
+                "recommended_top_up_kobo": p.recommended_top_up_kobo,
+                "recommended_top_up_naira": p.recommended_top_up_kobo / 100,
+                "needs_alert": crate::services::prediction_service::needs_alert(&p)
+            }
+        }))),
+        None => Ok(HttpResponse::Ok().json(json!({
+            "success": true,
+            "data": null,
+            "message": "Not enough consumption data yet"
+        })))
+    }
 }

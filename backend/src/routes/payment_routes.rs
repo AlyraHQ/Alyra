@@ -17,6 +17,7 @@ pub fn configure(cfg: &mut web::ServiceConfig) {
         web::scope("/api/payments")
             .service(initiate)
             .service(webhook)
+            .service(test_confirm)
             .service(get_transactions)
             .service(get_transaction)
     );
@@ -86,5 +87,68 @@ async fn get_transaction(state: web::Data<AppState>, auth_user: AuthUser, path: 
     Ok(HttpResponse::Ok().json(json!({
         "success": true,
         "data": TransactionResponse::from(txn)
+    })))
+}
+
+/// POST /api/payments/test-confirm — DEMO ONLY
+
+#[post("/test-confirm")]
+async fn test_confirm(
+    state: web::Data<AppState>,
+    body: web::Json<serde_json::Value>,
+) -> Result<HttpResponse, AppError> {
+    let txn_ref = body["reference"]
+        .as_str()
+        .ok_or_else(|| AppError::BadRequest("reference required".to_string()))?;
+
+    let transaction = crate::repository::transaction_repo::find_by_reference(
+        &state.db, txn_ref
+    )
+    .await
+    .map_err(AppError::DatabaseError)?
+    .ok_or_else(|| AppError::NotFound("Transaction not found".to_string()))?;
+
+    // Clone units_purchased once — BigDecimal doesn't implement Copy
+    // So we need owned copies for each function that consumes it
+    let units_for_token = transaction.units_purchased.clone();
+    let units_for_create = transaction.units_purchased.clone();
+    let units_for_display = transaction.units_purchased.clone();
+
+    // Generate 20-digit token — passes &BigDecimal (borrow, no move)
+    let token_code = crate::services::token_service::generate_token_code(
+        &state.config.token_secret_key,
+        &transaction.device_id,
+        &transaction.id,
+        &units_for_token,
+    )?;
+
+    // Save token — passes owned BigDecimal (moves units_for_create)
+    let token = crate::services::token_service::create_token(
+        &state.db,
+        transaction.id,
+        transaction.device_id,
+        &token_code,
+        units_for_create,
+    ).await?;
+
+    // Update transaction status to success
+    crate::repository::transaction_repo::update_status(
+        &state.db, transaction.id, "success"
+    ).await.map_err(AppError::DatabaseError)?;
+
+    // Link token to transaction
+    crate::repository::transaction_repo::update_token_id(
+        &state.db, transaction.id, token.id
+    ).await.map_err(AppError::DatabaseError)?;
+
+    let formatted = crate::services::token_service::format_token_display(&token_code);
+
+    Ok(HttpResponse::Ok().json(serde_json::json!({
+        "success": true,
+        "data": {
+            "token_code": formatted,
+            "units": format!("{} units", units_for_display),
+            "message": "Payment confirmed. Enter token on your meter."
+        }
     })))
 }

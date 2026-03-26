@@ -3,6 +3,7 @@ use hex;
 use serde::{Deserialize};
 use hmac::{Hmac, Mac};
 use sha2::Sha256;
+use sha2::{Sha512, Digest};
 
 use crate::{config::Config, errors::AppError};
 
@@ -32,20 +33,27 @@ pub struct PaymentStatusResponse {
 }
 
 //--- Intwerswitch Webpayment url ---// redirection of users for paymen completion
+
+
 pub fn build_payment_url(
     config: &Config,
-    txn_ref: &str, amount_kobo: i64, redirect_url: &str,
+    txn_ref: &str,
+    amount_kobo: i64,
+    redirect_url: &str,
 ) -> String {
-    let hash = compute_hmac(
-        &config.interswitch_mac_key,
-        &format!(
-            "{}:{}:{}:{}",
-            txn_ref,
-            config.interswitch_merchant_code,
-            config.interswitch_pay_item_id,
-            amount_kobo
-        ),
+    // Interswitch hash = SHA512(txnref + amount + payItemId + merchantCode)
+    let hash_input = format!(
+        "{}{}{}{}",
+        txn_ref,
+        amount_kobo,
+        config.interswitch_pay_item_id,
+        config.interswitch_merchant_code
     );
+
+    // SHA512 — NOT HMAC
+    let mut hasher = Sha512::new();
+    hasher.update(hash_input.as_bytes());
+    let hash = hex::encode(hasher.finalize());
 
     format!(
         "{}/collections/api/v1/getcheckoutform?\

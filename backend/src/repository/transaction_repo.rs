@@ -72,7 +72,7 @@ pub async fn find_by_reference(pool: &PgPool, interswitch_ref: &str) -> Result<O
 
 pub async fn update_status(pool: &PgPool, id: Uuid, status: &str) -> Result<(), sqlx::Error> {
     sqlx::query(
-        "UPDATE transactions SET status = $1, completed_at = NOW() WHERE id = $2",
+        "UPDATE transactions SET status = $1::txn_status, completed_at = NOW() WHERE id = $2"
     )
     .bind(status)
     .bind(id)
@@ -84,7 +84,7 @@ pub async fn update_status(pool: &PgPool, id: Uuid, status: &str) -> Result<(), 
 
 pub async fn update_token_id(pool: &PgPool, id: Uuid, token_id: Uuid) -> Result<(), sqlx::Error> {
     sqlx::query(
-        "UPDATE transactions SET token_id = $1 WHERE id = $2",
+        "UPDATE transactions SET token_id = $1 WHERE id = $2"
     )
     .bind(token_id)
     .bind(id)

@@ -41,7 +41,7 @@ pub async fn send_sms(
     };
 
     let resp = client
-        .post("https://api.ng.termii.com/api/sms/send")
+        .post("https://v3.api.termii.com/api/sms/send")
         .json(&payload)
         .send()
         .await

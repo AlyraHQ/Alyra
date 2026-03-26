@@ -1,80 +1,66 @@
-import Link from "next/link";
+'use client';
+import Link from 'next/link';
 
-export default function LandingPage() {
+export default function Home() {
   return (
-    <main className="min-h-screen bg-gray-950 flex flex-col">
-      <header className="flex items-center justify-between px-6 py-4 max-w-5xl mx-auto w-full">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-purple-600 flex items-center justify-center font-bold">A</div>
-          <span className="font-bold text-lg tracking-tight">Alyra</span>
-        </div>
-        <div className="flex gap-3">
-          <Link href="/login" className="text-sm text-gray-400 hover:text-white px-3 py-1.5 transition">
-            Login
-          </Link>
-          <Link href="/register" className="text-sm bg-purple-600 hover:bg-brand-600 text-white px-4 py-1.5 rounded-lg font-medium transition">
-            Get Started
-          </Link>
-        </div>
-      </header>
-
-      <section className="flex-1 flex flex-col items-center justify-center text-center px-6 py-16">
-        <div className="inline-flex items-center gap-2 bg-purple-600/10 border border-brand-500/30 rounded-full px-4 py-1.5 text-brand-400 text-sm font-medium mb-8">
-          ⚡ Smart Energy for Nigeria
-        </div>
-
-        <h1 className="text-4xl sm:text-6xl font-extrabold text-white max-w-3xl leading-tight mb-6">
-          Power your home.{" "}
-          <span className="text-brand-400">Never run out</span> again.
+    <main style={{
+      minHeight: '100vh',
+      background: '#534AB7',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: '24px',
+      fontFamily: 'system-ui, sans-serif',
+    }}>
+      <div style={{ maxWidth: 400, width: '100%', textAlign: 'center' }}>
+        <div style={{ fontSize: 48, marginBottom: 8 }}>⚡</div>
+        <h1 style={{ fontSize: 36, fontWeight: 700, color: '#EEEDFE', margin: '0 0 8px' }}>
+          Alyra
         </h1>
-
-        <p className="text-gray-400 text-lg max-w-xl mb-10 leading-relaxed">
-          Top up your prepaid meter or solar kit anytime. Get alerts before you run out.
-          Pay in small amounts that match your income.
+        <p style={{ color: '#AFA9EC', fontSize: 16, marginBottom: 8 }}>
+          Smart Energy Platform
+        </p>
+        <p style={{ color: '#EEEDFE', fontSize: 15, lineHeight: 1.6, marginBottom: 40 }}>
+          Power your home with solar energy. Buy tokens instantly from any phone no smartphone needed.
         </p>
 
-        <div className="flex flex-col sm:flex-row gap-4 w-full max-w-sm">
-          <Link href="/register" className="btn-primary text-center text-base">
-            Create Free Account
+        <div style={{ display: 'flex', gap: 12, flexDirection: 'column' }}>
+          <Link href="/register" style={{
+            background: '#fff',
+            color: '#534AB7',
+            padding: '14px 24px',
+            borderRadius: 12,
+            fontWeight: 600,
+            fontSize: 16,
+            textDecoration: 'none',
+            display: 'block',
+          }}>
+            Get Started
           </Link>
-          <Link href="/login" className="btn-outline text-center text-base">
-            I have an account
+          <Link href="/login" style={{
+            border: '2px solid #AFA9EC',
+            color: '#EEEDFE',
+            padding: '13px 24px',
+            borderRadius: 12,
+            fontWeight: 600,
+            fontSize: 16,
+            textDecoration: 'none',
+            display: 'block',
+          }}>
+            Sign In
           </Link>
         </div>
 
-        <div className="flex flex-wrap justify-center gap-3 mt-14">
-          {[
-            " Prepaid Grid Meters",
-            " Solar PAYG Systems",
-            " Depletion Alerts",
-            " Card, USSD & Bank Transfer",
-            " Works on any phone",
-          ].map((f) => (
-            <span key={f} className="bg-gray-800 border border-gray-700 text-gray-300 text-sm px-4 py-2 rounded-full">
-              {f}
-            </span>
-          ))}
-        </div>
-      </section>
-
-      <section className="border-t border-gray-800 py-12 px-6">
-        <div className="max-w-3xl mx-auto grid grid-cols-3 gap-6 text-center">
-          {[
-            { value: "₦50+", label: "Minimum top-up" },
-            { value: "20-digit", label: "Secure energy tokens" },
-            { value: "2 days", label: "Advance depletion alerts" },
-          ].map((s) => (
-            <div key={s.label}>
-              <p className="text-2xl sm:text-3xl font-extrabold text-brand-400">{s.value}</p>
-              <p className="text-gray-500 text-sm mt-1">{s.label}</p>
+        <div style={{ display: 'flex', justifyContent: 'center', gap: 32, marginTop: 48 }}>
+          {[['80M+', 'Off-grid Nigerians'], ['60s', 'Token delivery'], ['92%', 'Cheaper than gen']].map(([val, label]) => (
+            <div key={label} style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: 20, fontWeight: 700, color: '#EEEDFE' }}>{val}</div>
+              <div style={{ fontSize: 11, color: '#AFA9EC' }}>{label}</div>
             </div>
           ))}
         </div>
-      </section>
-
-      <footer className="text-center text-gray-600 text-sm py-6 border-t border-gray-800">
-        © {new Date().getFullYear()} Alyra · Built for Nigeria
-      </footer>
+      </div>
     </main>
   );
 }

@@ -18,6 +18,8 @@ mod services;
 
 #[tokio::main]
 async fn main()-> anyhow::Result<()> {
+
+    let _ = rustls::crypto::ring::default_provider().install_default();
     
     //load env variable
     let _ = dotenvy::dotenv();

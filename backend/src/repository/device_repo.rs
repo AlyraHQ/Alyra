@@ -3,35 +3,6 @@ use uuid::Uuid;
 
 use crate::models::device::Device;
 
-/// create a device
-// pub async fn create(pool: &PgPool, 
-//     user_id: Uuid, 
-//     vendor_id: Uuid, 
-//     device_name: &str, 
-//     device_type: &str, 
-//     state: Option<&str>, 
-//     lga: Option<&str>, 
-//     address: Option<&str>) -> Result<Device, sqlx::Error> {
-//     let device = sqlx::query_as::<_, Device>(
-//         "INSERT INTO devices (user_id, vendor_id, device_name, device_type, state, lga, address)
-//         VALUES($1, $2, $3, $4, $5, $6, $7)
-//         RETURNING *",
-//     )
-//     .bind(user_id)
-//     .bind(vendor_id)
-//     .bind(device_name)
-//     .bind(device_type)
-//     .bind(state)
-//     .bind(lga)
-//     .bind(address)
-//     .fetch_one(pool)
-//     .await?;
-
-
-//     Ok(device)
-
-// }
-
 pub async fn create(
     pool: &PgPool,
     user_id: Uuid,
@@ -44,7 +15,7 @@ pub async fn create(
 ) -> Result<Device, sqlx::Error> {
     let device = sqlx::query_as::<_, Device>(
         "INSERT INTO devices (user_id, vendor_id, device_name, device_type, state, lga, address)
-         VALUES ($1, $2, $3, $4, $5, $6, $7)
+         VALUES ($1, $2, $3, $4::device_type, $5, $6, $7)
          RETURNING id, user_id, vendor_id, device_name, device_type::text,
                    status::text, state, lga, address, created_at, updated_at"
     )

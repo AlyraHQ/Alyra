@@ -6,7 +6,8 @@ use crate::state::AppState;
 
 pub fn configure(cfg: &mut web::ServiceConfig) {
     cfg.service(health_check)
-       .service(health_db);
+       .service(health_db)
+       .service(health_sms);
 }
 
 #[get("/health")]
@@ -30,5 +31,17 @@ async fn health_db(state: web::Data<AppState>) -> impl Responder {
             "database": "disconnected",
             "detail": e.to_string()
         })),
+    }
+}
+
+#[get("/health/sms")]
+async fn health_sms(state: web::Data<AppState>) -> impl Responder {
+    match crate::services::sms_service::send_sms(
+        &state.config,
+        "08012345678",  // replace with your real phone number
+        "Alyra test SMS - backend is working!",
+    ).await {
+        Ok(_) => HttpResponse::Ok().json(json!({"status":"ok","sms":"sent"})),
+        Err(e) => HttpResponse::BadGateway().json(json!({"status":"error","detail":e.to_string()})),
     }
 }

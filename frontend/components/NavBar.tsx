@@ -23,7 +23,7 @@ export default function NavBar() {
       <nav className="sticky top-0 z-40 bg-gray-950/80 backdrop-blur border-b border-gray-800">
         <div className="max-w-lg mx-auto px-4 h-14 flex items-center justify-between">
           <Link href="/dashboard" className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-brand-500 flex items-center justify-center text-sm font-bold">
+            <div className="w-7 h-7 rounded-lg bg-purple-600 flex items-center justify-center text-sm font-bold">
               A
             </div>
             <span className="font-bold text-white tracking-tight">Alyra</span>
@@ -36,7 +36,7 @@ export default function NavBar() {
                 href={l.href}
                 className={`px-3 py-1.5 rounded-lg text-sm font-medium transition ${
                   pathname === l.href
-                    ? "bg-brand-500/20 text-brand-400"
+                    ? "bg-purple-600/20 text-brand-400"
                     : "text-gray-400 hover:text-white"
                 }`}
               >

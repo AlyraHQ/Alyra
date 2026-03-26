@@ -58,7 +58,7 @@ function BuyEnergyContent() {
               onClick={() => setSelectedDevice(d.id)}
               className={`w-full flex items-center justify-between px-4 py-3 rounded-xl border transition ${
                 selectedDevice === d.id
-                  ? "border-brand-500 bg-brand-500/10 text-white"
+                  ? "border-brand-500 bg-purple-600/10 text-white"
                   : "border-gray-700 text-gray-400 hover:border-gray-600"
               }`}
             >
@@ -83,7 +83,7 @@ function BuyEnergyContent() {
               onClick={() => { setAmount(a); setCustomAmount(""); }}
               className={`py-3 rounded-xl border text-sm font-semibold transition ${
                 amount === a && !customAmount
-                  ? "border-brand-500 bg-brand-500/20 text-brand-300"
+                  ? "border-brand-500 bg-purple-600/20 text-brand-300"
                   : "border-gray-700 text-gray-300 hover:border-gray-500"
               }`}
             >
@@ -107,7 +107,7 @@ function BuyEnergyContent() {
 
       {/* Summary */}
       {finalAmount && Number(finalAmount) >= 50 && (
-        <div className="card bg-brand-500/10 border-brand-500/30">
+        <div className="card bg-purple-600/10 border-brand-500/30">
           <div className="flex justify-between text-sm">
             <span className="text-gray-400">You pay</span>
             <span className="font-bold text-brand-300">₦{Number(finalAmount).toLocaleString()}</span>

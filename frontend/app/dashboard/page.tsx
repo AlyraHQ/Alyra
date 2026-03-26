@@ -97,7 +97,7 @@ export default function DashboardPage() {
                   </div>
                   <div className="w-full bg-gray-800 rounded-full h-2">
                     <div
-                      className="bg-brand-500 h-2 rounded-full transition-all"
+                      className="bg-purple-600 h-2 rounded-full transition-all"
                       style={{ width: `${Math.min((device.current_units / 50) * 100, 100)}%` }}
                     />
                   </div>

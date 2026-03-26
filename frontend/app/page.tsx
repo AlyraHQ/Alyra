@@ -5,21 +5,21 @@ export default function LandingPage() {
     <main className="min-h-screen bg-gray-950 flex flex-col">
       <header className="flex items-center justify-between px-6 py-4 max-w-5xl mx-auto w-full">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-brand-500 flex items-center justify-center font-bold">A</div>
+          <div className="w-8 h-8 rounded-lg bg-purple-600 flex items-center justify-center font-bold">A</div>
           <span className="font-bold text-lg tracking-tight">Alyra</span>
         </div>
         <div className="flex gap-3">
           <Link href="/login" className="text-sm text-gray-400 hover:text-white px-3 py-1.5 transition">
             Login
           </Link>
-          <Link href="/register" className="text-sm bg-brand-500 hover:bg-brand-600 text-white px-4 py-1.5 rounded-lg font-medium transition">
+          <Link href="/register" className="text-sm bg-purple-600 hover:bg-brand-600 text-white px-4 py-1.5 rounded-lg font-medium transition">
             Get Started
           </Link>
         </div>
       </header>
 
       <section className="flex-1 flex flex-col items-center justify-center text-center px-6 py-16">
-        <div className="inline-flex items-center gap-2 bg-brand-500/10 border border-brand-500/30 rounded-full px-4 py-1.5 text-brand-400 text-sm font-medium mb-8">
+        <div className="inline-flex items-center gap-2 bg-purple-600/10 border border-brand-500/30 rounded-full px-4 py-1.5 text-brand-400 text-sm font-medium mb-8">
           ⚡ Smart Energy for Nigeria
         </div>
 

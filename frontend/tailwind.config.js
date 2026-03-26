@@ -1,5 +1,4 @@
-// Tailwind v4 loads this config via its own JS/TS loader.
-// Keep this file free of TS-only type syntax so it can be parsed reliably.
+/** @type {import('tailwindcss').Config} */
 const config = {
   content: [
     "./pages/**/*.{js,ts,jsx,tsx,mdx}",
@@ -30,4 +29,5 @@ const config = {
   plugins: [],
 };
 
-export default config;
+module.exports = config;
+

@@ -34,7 +34,7 @@ export default function RegisterPage() {
     <main className="min-h-screen flex flex-col items-center justify-center px-4 bg-gray-950 py-10">
       <div className="w-full max-w-sm">
         <Link href="/" className="flex items-center gap-2 mb-8 justify-center">
-          <div className="w-9 h-9 rounded-xl bg-brand-500 flex items-center justify-center font-bold text-lg">A</div>
+          <div className="w-9 h-9 rounded-xl bg-purple-600 flex items-center justify-center font-bold text-lg">A</div>
           <span className="font-bold text-xl tracking-tight">Alyra</span>
         </Link>
 

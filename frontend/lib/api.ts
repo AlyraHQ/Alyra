@@ -99,64 +99,129 @@
 //   );
 // }
 
-const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
-export async function apiCall(
-  endpoint: string,
-  options: RequestInit = {}
-) {
-  const token = typeof window !== 'undefined'
-    ? localStorage.getItem('alyra_token')
-    : null;
+/////-------2222222222222----------//////
 
-  const res = await fetch(`${API}${endpoint}`, {
-    ...options,
+// const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+
+// export async function apiCall(
+//   endpoint: string,
+//   options: RequestInit = {}
+// ) {
+//   const token = typeof window !== 'undefined'
+//     ? localStorage.getItem('alyra_token')
+//     : null;
+
+//   const res = await fetch(`${API}${endpoint}`, {
+//     ...options,
+//     headers: {
+//       'Content-Type': 'application/json',
+//       ...(token ? { Authorization: `Bearer ${token}` } : {}),
+//       ...options.headers,
+//     },
+//   });
+
+//   const data = await res.json();
+
+//   if (!res.ok) {
+//     throw new Error(data?.error?.message || 'Something went wrong');
+//   }
+
+//   return data;
+// }
+
+// export const api = {
+//   register: (phone: string, pin: string, full_name: string) =>
+//     apiCall('/api/auth/register', {
+//       method: 'POST',
+//       body: JSON.stringify({ phone, pin, full_name }),
+//     }),
+
+//   login: (phone: string, pin: string) =>
+//     apiCall('/api/auth/login', {
+//       method: 'POST',
+//       body: JSON.stringify({ phone, pin }),
+//     }),
+
+//   me: () => apiCall('/api/auth/me'),
+
+//   getDevices: () => apiCall('/api/devices'),
+
+//   initiatePayment: (device_id: string, amount_kobo: number, channel: string) =>
+//     apiCall('/api/payments/initiate', {
+//       method: 'POST',
+//       body: JSON.stringify({ device_id, amount_kobo, channel }),
+//     }),
+
+//   getTransactions: () => apiCall('/api/payments/transactions'),
+
+//   registerGridMeter: (data: {
+//     device_name: string;
+//     meter_number: string;
+//     tariff_kobo_per_kwh: number;
+//     state?: string;
+//     lga?: string;
+//   }) => apiCall('/api/devices/grid', { method: 'POST', body: JSON.stringify(data) }),
+// };
+
+
+const BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+
+async function request(method: string, path: string, body?: object) {
+  const token = typeof window !== 'undefined' ? localStorage.getItem('access_token') : null;
+  
+  const res = await fetch(`${BASE}${path}`, {
+    method,
     headers: {
       'Content-Type': 'application/json',
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      ...options.headers,
     },
+    ...(body ? { body: JSON.stringify(body) } : {}),
   });
 
-  const data = await res.json();
-
-  if (!res.ok) {
-    throw new Error(data?.error?.message || 'Something went wrong');
+  if (res.status === 401) {
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('access_token');
+      window.location.href = '/login';
+    }
   }
 
-  return data;
+  const data = await res.json();
+  
+  if (!res.ok) {
+    throw new Error(data?.error?.message || 'Request failed');
+  }
+
+  return data.data;
 }
 
-export const api = {
-  register: (phone: string, pin: string, full_name: string) =>
-    apiCall('/api/auth/register', {
-      method: 'POST',
-      body: JSON.stringify({ phone, pin, full_name }),
-    }),
+export const authAPI = {
+  register: (body: { phone: string; pin: string; full_name?: string }) =>
+    request('POST', '/api/auth/register', body),
+  login: (body: { phone: string; pin: string }) =>
+    request('POST', '/api/auth/login', body),
+  me: () => request('GET', '/api/auth/me'),
+};
 
-  login: (phone: string, pin: string) =>
-    apiCall('/api/auth/login', {
-      method: 'POST',
-      body: JSON.stringify({ phone, pin }),
-    }),
+export const vendorAPI = {
+  register: (body: { business_name: string; owner_name: string; phone: string; email?: string }) =>
+    request('POST', '/api/vendors/register', body),
+  get: (id: string) => request('GET', `/api/vendors/${id}`),
+};
 
-  me: () => apiCall('/api/auth/me'),
+export const deviceAPI = {
+  list: () => request('GET', '/api/devices'),
+  get: (id: string) => request('GET', `/api/devices/${id}`),
+  registerGrid: (body: { device_name: string; meter_number: string; tariff_kobo_per_kwh: number; state?: string; lga?: string }) =>
+    request('POST', '/api/devices/grid', body),
+  registerSolar: (body: { device_name: string; kit_serial_number: string; daily_rate_kobo: number; state?: string; lga?: string }) =>
+    request('POST', '/api/devices/solar', body),
+};
 
-  getDevices: () => apiCall('/api/devices'),
-
-  initiatePayment: (device_id: string, amount_kobo: number, channel: string) =>
-    apiCall('/api/payments/initiate', {
-      method: 'POST',
-      body: JSON.stringify({ device_id, amount_kobo, channel }),
-    }),
-
-  getTransactions: () => apiCall('/api/payments/transactions'),
-
-  registerGridMeter: (data: {
-    device_name: string;
-    meter_number: string;
-    tariff_kobo_per_kwh: number;
-    state?: string;
-    lga?: string;
-  }) => apiCall('/api/devices/grid', { method: 'POST', body: JSON.stringify(data) }),
+export const paymentAPI = {
+  initiate: (body: { device_id: string; amount_kobo: number; channel: string }) =>
+    request('POST', '/api/payments/initiate', body),
+  testConfirm: (reference: string) =>
+    request('POST', '/api/payments/test-confirm', { reference }),
+  transactions: () => request('GET', '/api/payments/transactions'),
 };

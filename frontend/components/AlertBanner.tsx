@@ -20,7 +20,7 @@ export default function AlertBanner({ prediction, deviceId }: Props) {
 
   return (
     <div className="bg-amber-900/40 border border-amber-600/50 rounded-2xl p-4 flex items-start gap-3">
-      <span className="text-2xl">⚠️</span>
+      <span className="text-2xl"></span>
       <div className="flex-1">
         <p className="font-semibold text-amber-300 text-sm">Low Energy Alert</p>
         <p className="text-amber-100/80 text-sm mt-0.5">

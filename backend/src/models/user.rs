@@ -2,6 +2,7 @@ use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use sqlx::prelude::FromRow;
 use uuid::Uuid;
+use sqlx::Type;
 
 #[derive(Debug, Deserialize, Serialize, PartialEq, FromRow, Clone)]
 pub struct User {

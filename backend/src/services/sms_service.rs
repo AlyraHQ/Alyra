@@ -37,7 +37,7 @@ pub async fn send_sms(
         sms: message.to_string(),
         msg_type: "plain".to_string(),
         api_key: config.termii_api_key.clone(),
-        channel: "dnd".to_string(),
+        channel: "generic".to_string(),
     };
 
     let resp = client

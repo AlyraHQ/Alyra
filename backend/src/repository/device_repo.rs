@@ -32,17 +32,7 @@ pub async fn create(
 }
 
 /// find a device by user
-// pub async fn find_by_user(pool: &PgPool, user_id: Uuid) -> Result<Vec<Device>, sqlx::Error> {
-//     let devices = sqlx::query_as::<_, Device>(
-//         "SELECT * FROM devices WHERE user_id = $1 ORDER BY created_at DESC",
-//     )
-//     .bind(user_id)
-//     .fetch_all(pool)
-//     .await?;
 
-//     Ok(devices)
-
-// }
 pub async fn find_by_user(pool: &PgPool, user_id: Uuid) -> Result<Vec<Device>, sqlx::Error> {
     let devices = sqlx::query_as::<_, Device>(
         "SELECT id, user_id, vendor_id, device_name, device_type::text,
@@ -57,17 +47,6 @@ pub async fn find_by_user(pool: &PgPool, user_id: Uuid) -> Result<Vec<Device>, s
 
 
 /// find a device by id
-// pub async fn find_by_id(pool: &PgPool, id: Uuid) -> Result<Option<Device>, sqlx::Error> {
-//     let device = sqlx::query_as::<_, Device>(
-//         "SELECT * FROM devices WHERE id = $1",
-//     )
-//     .bind(id)
-//     .fetch_optional(pool)
-//     .await?;
-
-
-//     Ok(device)
-// }
 pub async fn find_by_id(pool: &PgPool, id: Uuid) -> Result<Option<Device>, sqlx::Error> {
     let device = sqlx::query_as::<_, Device>(
         "SELECT id, user_id, vendor_id, device_name, device_type::text, 

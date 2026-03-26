@@ -108,13 +108,31 @@ async fn test_confirm(
     .map_err(AppError::DatabaseError)?
     .ok_or_else(|| AppError::NotFound("Transaction not found".to_string()))?;
 
-    // Clone units_purchased once — BigDecimal doesn't implement Copy
-    // So we need owned copies for each function that consumes it
+    // Idempotency — if already processed return existing token
+    if transaction.status == "success" {
+        if let Some(token_id) = transaction.token_id {
+            if let Ok(Some(existing_token)) = crate::repository::token_repo::find_by_id(
+                &state.db, token_id
+            ).await {
+                let formatted = crate::services::token_service::format_token_display(
+                    &existing_token.token_code
+                );
+                return Ok(HttpResponse::Ok().json(serde_json::json!({
+                    "success": true,
+                    "data": {
+                        "token_code": formatted,
+                        "units": format!("{} units", existing_token.units),
+                        "message": "Token already generated for this transaction."
+                    }
+                })));
+            }
+        }
+    }
+
     let units_for_token = transaction.units_purchased.clone();
     let units_for_create = transaction.units_purchased.clone();
     let units_for_display = transaction.units_purchased.clone();
 
-    // Generate 20-digit token — passes &BigDecimal (borrow, no move)
     let token_code = crate::services::token_service::generate_token_code(
         &state.config.token_secret_key,
         &transaction.device_id,
@@ -122,7 +140,6 @@ async fn test_confirm(
         &units_for_token,
     )?;
 
-    // Save token — passes owned BigDecimal (moves units_for_create)
     let token = crate::services::token_service::create_token(
         &state.db,
         transaction.id,
@@ -131,12 +148,10 @@ async fn test_confirm(
         units_for_create,
     ).await?;
 
-    // Update transaction status to success
     crate::repository::transaction_repo::update_status(
         &state.db, transaction.id, "success"
     ).await.map_err(AppError::DatabaseError)?;
 
-    // Link token to transaction
     crate::repository::transaction_repo::update_token_id(
         &state.db, transaction.id, token.id
     ).await.map_err(AppError::DatabaseError)?;

@@ -8,7 +8,7 @@ pub async fn create(
     user_id: Uuid,
     device_id: Uuid,
     amount_kobo: i64,
-    units_purchased: f64,
+    units_purchased: BigDecimal,
     channel: &str,
     interswitch_ref: &str,
 ) -> Result<Transaction, sqlx::Error> {

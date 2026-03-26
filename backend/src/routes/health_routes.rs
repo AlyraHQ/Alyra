@@ -38,7 +38,7 @@ async fn health_db(state: web::Data<AppState>) -> impl Responder {
 async fn health_sms(state: web::Data<AppState>) -> impl Responder {
     match crate::services::sms_service::send_sms(
         &state.config,
-        "07087186962",  // your real number
+        "2347087186962",  // your real number
         "Alyra test SMS - backend is working!",
     ).await {
         Ok(_) => HttpResponse::Ok().json(json!({"status":"ok","sms":"sent"})),

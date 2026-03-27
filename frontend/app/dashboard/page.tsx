@@ -2,12 +2,12 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { api } from '../../lib/api';
+import { api, Prediction } from '../../lib/api';
 
 type User = { id: string; full_name?: string; phone?: string; vendor_id?: string };
 type Device = { id: string; device_name: string; units_balance: number | null; status: string; device_type: string; lga?: string; state?: string };
 type Transaction = { id: string; amount_kobo: number; initiated_at: string; units_purchased?: number | null; status: string };
-type Prediction = { hours_until_empty: number; units_remaining: number; recommended_top_up_naira: number; needs_alert: boolean; consumption_rate_per_hour: number };
+
 
 // Define error type
 type ApiError = {

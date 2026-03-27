@@ -18,10 +18,10 @@ export default function HomePage() {
           Smart Energy Platform
         </div>
         <h1 style={{ fontSize: 44, fontWeight: 800, lineHeight: 1.1, color: '#111827', marginBottom: 18, maxWidth: 600, letterSpacing: '-1px' }}>
-          Know exactly when your power will run out — before it does
+          Know exactly when your power will run out  before it does.. it get better with ALYRA
         </h1>
         <p style={{ fontSize: 17, color: '#4b5563', lineHeight: 1.65, maxWidth: 540, marginBottom: 32 }}>
-          Alyra unifies grid prepaid meters and solar PAYG systems. Buy energy tokens, get predictive depletion alerts, and top up in amounts that match your income — from any phone, with or without internet.
+          Alyra unifies grid prepaid meters and solar PAYG systems. Buy energy tokens, get predictive depletion alerts, and top up in amounts that match your income from any phone, with or without internet.
         </p>
         <div style={{ display: 'flex', gap: 12 }}>
           <Link href="/register" style={{ background: '#1a56db', color: '#fff', fontWeight: 600, padding: '13px 28px', borderRadius: 10, textDecoration: 'none', fontSize: 15 }}>Create Account</Link>
@@ -66,7 +66,7 @@ export default function HomePage() {
 
       {/* Footer */}
       <footer style={{ borderTop: '1px solid #e5e7eb', padding: '24px', textAlign: 'center', color: '#9ca3af', fontSize: 13 }}>
-        Alyra — Smart Energy Payments for Nigeria
+        Alyra — Smart Energy Payments for Nigeria & Africa
       </footer>
     </main>
   );

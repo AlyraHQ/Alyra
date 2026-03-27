@@ -16,10 +16,11 @@ async function req(endpoint: string, options: RequestInit = {}) {
 }
 
 export interface Prediction {
-  predicted_depletion_hours: number;
-  current_units: number;
-  recommended_topup_naira: number;
-  recommended_units: number;
+  hours_until_empty: number;
+  units_remaining: number;
+  recommended_top_up_naira: number;
+  needs_alert: boolean;
+  consumption_rate_per_hour: number;
 }
 
 export const api = {
@@ -59,4 +60,4 @@ export const api = {
       body: JSON.stringify({ reference })
     }),
 };
-export type Prediction = Record<string, unknown>;
+

@@ -59,3 +59,4 @@ export const api = {
       body: JSON.stringify({ reference })
     }),
 };
+export type Prediction = Record<string, unknown>;

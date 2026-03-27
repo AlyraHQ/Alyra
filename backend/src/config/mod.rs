@@ -89,7 +89,7 @@ impl Config {
             interswitch_secret_key: required_env("INTERSWITCH_SECRET_KEY")?,
             interswitch_mac_key: required_env("INTERSWITCH_MAC_KEY")?,
             interswitch_base_url: std::env::var("INTERSWITCH_BASE_URL")
-                .unwrap_or_else(|_| "https://sandbox.interswitchng.com".to_string()),
+                .unwrap_or_else(|_| "https://newwebpay.qa.interswitchng.com/collections/w/pay".to_string()),
             interswitch_data_ref: required_env("INTERSWITCH_DATA_REF")?,
 
             bcrypt_cost: std::env::var("BCRYPT_COST")

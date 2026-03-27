@@ -12,8 +12,8 @@ pub async fn create(pool: &PgPool,
     email: Option<&str>, 
     cac_number: Option<&str>) -> Result<Vendor, sqlx::Error> {
     let vendor = sqlx::query_as::<_, Vendor>(
-        "INSERT INTO vendors (business_name, owner_name, phone, email, cac_number)
-        VALUES ($1, $2, $3, $4, $5)
+        "INSERT INTO vendors (business_name, owner_name, phone, email, cac_number, is_approved)
+            VALUES ($1, $2, $3, $4, $5, true)
         RETURNING *",
     )
     .bind(business_name)

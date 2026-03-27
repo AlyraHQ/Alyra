@@ -48,6 +48,7 @@ pub async fn create(
     .bind(email)
     .bind(state)
     .bind(lga)
+    .bind(vendor_id)
     .fetch_one(pool)
     .await?;
     Ok(user)

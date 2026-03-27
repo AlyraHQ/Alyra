@@ -290,4 +290,21 @@ Alyra is the **first Nigerian energy platform** to:
 
 > **In short: Alyra is a universal, predictive, and inclusive energy platform that empowers households to reliably access electricity anytime, anywhere.**
 
-Built for Nigeria. Designed for everyone.
+## TEAMS
+
+## Product Management
+
+Abdullahi Nofisat - Product Manager
+. Defined product vision and positioning for Alyra
+. Wrote the PRD (features, MVP scope, GTM strategy)
+. Designed user flows (paycode system, alerts, recharge logic)
+. Led overall product direction and experience
+
+
+## Engineering
+
+Oyetunde D. - Software Engineer
+. Built core system architecture
+. Implemented paycode generation and validation
+. Integrated payment processing 
+. Developed energy vending and predictive monitoring logic

@@ -38,8 +38,16 @@ export const api = {
 
   // Payments
   initiatePayment: (device_id: string, amount_kobo: number, channel: string) =>
-    req('/api/payments/initiate', { method: 'POST', body: JSON.stringify({ device_id, amount_kobo, channel }) }),
+    req('/api/payments/initiate', {
+      method: 'POST',
+      body: JSON.stringify({ device_id, amount_kobo, channel })
+    }),
   testConfirm: (reference: string) =>
     req('/api/payments/test-confirm', { method: 'POST', body: JSON.stringify({ reference }) }),
   getTransactions: () => req('/api/payments/transactions'),
+  verifyPayment: (reference: string) =>
+    req('/api/payments/verify', {
+      method: 'POST',
+      body: JSON.stringify({ reference })
+    }),
 };

@@ -12,7 +12,7 @@ export default function RegisterDevicePage() {
   const [type, setType] = useState<'grid' | 'solar'>('grid');
   const [vendors, setVendors] = useState<Vendor[]>([]);
   const [vendorError, setVendorError] = useState('');
-  const [user, setUser] = useState<User | null>(null);
+  const [, setUser] = useState<User | null>(null);
   const [form, setForm] = useState({
     device_name: '', meter_number: '', kit_serial_number: '',
     tariff_kobo_per_kwh: '8500', daily_rate_kobo: '20000',

@@ -11,7 +11,7 @@ interface Props {
 export default function AlertBanner({ prediction, deviceId }: Props) {
   if (!prediction) return null;
   const hours = prediction.hours_until_empty;
-  if (hours > 48) return null;
+  // if (hours > 48) return null;
 
   const timeLabel =
     hours >= 24

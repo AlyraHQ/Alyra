@@ -71,3 +71,18 @@ pub async fn update_status(pool: &PgPool, id: Uuid, status: &str) -> Result<(), 
 
     Ok(())
 }
+
+pub async fn add_units(
+    pool: &sqlx::PgPool,
+    device_id: uuid::Uuid,
+    units: f64,
+) -> Result<(), sqlx::Error> {
+    sqlx::query(
+        "UPDATE devices SET units_balance = COALESCE(units_balance, 0) + $1 WHERE id = $2"
+    )
+    .bind(units)
+    .bind(device_id)
+    .execute(pool)
+    .await?;
+    Ok(())
+}

@@ -1,4 +1,4 @@
-use actix_web::{post, get, web, HttpResponse, Responder};
+use actix_web::{post, get, web, HttpResponse};
 use serde_json::json;
 
 use crate::state::AppState;

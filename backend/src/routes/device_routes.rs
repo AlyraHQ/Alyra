@@ -170,7 +170,7 @@ async fn register_solar_kit(
 #[get("/{id}/prediction")]
 async fn get_prediction(
     state: web::Data<AppState>,
-    auth_user: AuthUser,
+    _auth_user: AuthUser,
     path: web::Path<uuid::Uuid>,
 ) -> Result<HttpResponse, AppError> {
     let device_id = path.into_inner();

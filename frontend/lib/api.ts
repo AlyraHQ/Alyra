@@ -61,7 +61,7 @@
 //     }),
 // };
 
-// frontend/lib/api.ts
+
 const API = process.env.NEXT_PUBLIC_API_URL || 'https://alyra.up.railway.app';
 
 async function req(endpoint: string, options: RequestInit = {}) {

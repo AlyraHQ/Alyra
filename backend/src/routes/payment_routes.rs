@@ -1,7 +1,6 @@
 use actix_web::{get, post, web, HttpResponse};
 use serde::{Deserialize};
 use serde_json::json;
-use uuid::Uuid;
 use crate::dto::payment_dto::InitiatePaymentRequest;
 
 use crate::errors::AppError;
@@ -36,6 +35,9 @@ async fn initiate_payment(
     body: web::Json<InitiatePaymentRequest>,
 ) -> Result<HttpResponse, AppError> {
     let req = body.into_inner();
+    
+    println!("=== PAYMENT INITIATION ===");
+    println!("Device: {}, Amount in kobo: {}", req.device_id, req.amount_kobo);
 
     if req.amount_kobo < 10000 {
         return Err(AppError::BadRequest(
@@ -62,6 +64,20 @@ async fn initiate_payment(
         req,
     )
     .await?;
+    
+    // Debug logging
+    println!("=== SENDING TO INTERSWITCH ===");
+    println!("URL: {}", resp.payment_url);
+    println!("Form fields:");
+    println!("  product_id: {}", resp.form_fields.product_id);
+    println!("  hash: {}", resp.form_fields.hash);
+    println!("  pay_item_id: {}", resp.form_fields.pay_item_id);
+    println!("  txn_ref: {}", resp.form_fields.txn_ref);
+    println!("  amount: {} kobo (₦{})", resp.form_fields.amount, resp.form_fields.amount as f64 / 100.0);
+    println!("  currency: {}", resp.form_fields.currency);
+    println!("  site_redirect_url: {}", resp.form_fields.site_redirect_url);
+    println!("  cust_email: {:?}", resp.form_fields.cust_email);
+    println!("  pay_item_name: {}", resp.form_fields.pay_item_name);
 
     Ok(HttpResponse::Ok().json(json!({
         "success": true,
@@ -72,6 +88,7 @@ async fn initiate_payment(
         }
     })))
 }
+
 // ── POST /api/payments/verify
 
 #[post("/verify")]
@@ -81,31 +98,18 @@ async fn verify_payment(
     body: web::Json<VerifyRequest>,
 ) -> Result<HttpResponse, AppError> {
     let txn_ref = &body.reference;
-
+    
     let txn = transaction_repo::find_by_ref(&state.db, txn_ref)
         .await
         .map_err(AppError::DatabaseError)?
         .ok_or_else(|| AppError::NotFound("Transaction not found".to_string()))?;
 
-    // Guard: only the owner can verify
     if txn.user_id != auth.id {
         return Err(AppError::Unauthorized("Not your transaction".to_string()));
     }
 
-    // Already confirmed — return cached result
-    if txn.status == "success" {
-        return Ok(HttpResponse::Ok().json(json!({
-            "success": true,
-            "data": {
-                "status": "success",
-                "units": format!("{:.1} kWh credited", txn.units_purchased.to_string().parse::<f64>().unwrap_or(0.0)),
-            }
-        })));
-    }
-
-    // Call Interswitch to verify
     let verify_url = payment_service::get_verify_url(txn_ref, txn.amount_kobo);
-
+    
     let client = reqwest::Client::new();
     let response = client
         .get(&verify_url)
@@ -119,9 +123,11 @@ async fn verify_payment(
         .await
         .map_err(|e| AppError::ExternalServiceError(e.to_string()))?;
 
-    let code = isw["ResponseCode"].as_str().unwrap_or("99");
+    // Check ResponseCode as per docs
+    let response_code = isw["ResponseCode"].as_str().unwrap_or("99");
+    let amount = isw["Amount"].as_i64().unwrap_or(0);
 
-    if code == "00" {
+    if response_code == "00" && amount == txn.amount_kobo {
         let units = txn.amount_kobo as f64 / 8500.0;
         let token = payment_service::generate_token();
 
@@ -151,7 +157,7 @@ async fn verify_payment(
             "success": false,
             "data": {
                 "status": "failed",
-                "response_code": code,
+                "response_code": response_code,
                 "message": isw["ResponseDescription"].as_str().unwrap_or("Payment failed"),
             }
         })))

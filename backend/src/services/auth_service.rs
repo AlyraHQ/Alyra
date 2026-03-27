@@ -42,9 +42,10 @@ pub async fn register(
         req.email.as_deref(),
         req.state.as_deref(),
         req.lga.as_deref(),
+        req.vendor_id,
     )
     .await
-    .map_err(AppError::DatabaseError)?;
+    .map_err(|e| AppError::DatabaseError(e))?;
 
     
     Ok(UserResponse::from(user))

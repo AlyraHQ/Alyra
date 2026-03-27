@@ -30,9 +30,9 @@ export const api = {
 
   // Devices
   getDevices: () => req('/api/devices'),
-  registerGrid: (data: { device_name: string; meter_number: string; tariff_kobo_per_kwh: number; state?: string; lga?: string }) =>
+  registerGrid: (data: { device_name: string; meter_number: string; tariff_kobo_per_kwh: number; state?: string; lga?: string; vendor_id?: string }) =>
     req('/api/devices/grid', { method: 'POST', body: JSON.stringify(data) }),
-  registerSolar: (data: { device_name: string; kit_serial_number: string; daily_rate_kobo: number; state?: string; lga?: string }) =>
+  registerSolar: (data: { device_name: string; kit_serial_number: string; daily_rate_kobo: number; state?: string; lga?: string; vendor_id?: string }) =>
     req('/api/devices/solar', { method: 'POST', body: JSON.stringify(data) }),
   getPrediction: (deviceId: string) => req(`/api/devices/${deviceId}/prediction`),
 

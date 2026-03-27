@@ -9,6 +9,16 @@ type Device = { id: string; device_name: string; units_balance: number | null; s
 type Transaction = { id: string; amount_kobo: number; initiated_at: string; units_purchased?: number | null; status: string };
 type Prediction = { hours_until_empty: number; units_remaining: number; recommended_top_up_naira: number; needs_alert: boolean; consumption_rate_per_hour: number };
 
+// Define error type
+type ApiError = {
+  message?: string;
+  response?: {
+    data?: {
+      message?: string;
+    };
+  };
+};
+
 function UsageBar({ pct, low }: { pct: number; low: boolean }) {
   return (
     <div style={{ background: '#f3f4f6', borderRadius: 6, height: 10, overflow: 'hidden', marginTop: 6 }}>
@@ -53,16 +63,19 @@ export default function DashboardPage() {
       const devs: Device[] = Array.isArray(devData) ? devData : [];
       setDevices(devs);
       setTransactions(Array.isArray(txnData) ? txnData : []);
-      // fetch predictions for each device
       const preds: Record<string, Prediction> = {};
       await Promise.all(devs.map(async d => {
         try {
           const p = await api.getPrediction(d.id);
           if (p) preds[d.id] = p;
-        } catch { /* not enough data yet */ }
+        } catch {
+          // not enough data yet
+        }
       }));
       setPredictions(preds);
-    } catch {
+    } catch (error) {
+      const apiError = error as ApiError;
+      console.error('Failed to load dashboard data:', apiError?.message || 'Unknown error');
       router.push('/login');
     } finally {
       setLoading(false);
@@ -70,7 +83,10 @@ export default function DashboardPage() {
   }, [router]);
 
   useEffect(() => {
-    if (!localStorage.getItem('alyra_token')) { router.push('/login'); return; }
+    if (!localStorage.getItem('alyra_token')) { 
+      router.push('/login'); 
+      return; 
+    }
     load();
   }, [load, router]);
 
@@ -79,7 +95,6 @@ export default function DashboardPage() {
     router.push('/login');
   };
 
-  // Daily usage from last 7 transactions
   const dailyUsage = transactions
     .filter(t => t.status === 'success' && t.units_purchased)
     .slice(0, 7)
@@ -98,7 +113,6 @@ export default function DashboardPage() {
 
   return (
     <main style={{ minHeight: '100vh', background: '#f5f7fa', fontFamily: 'system-ui, sans-serif' }}>
-      {/* Header */}
       <header style={{ background: '#fff', borderBottom: '1px solid #e5e7eb', padding: '14px 24px', position: 'sticky', top: 0, zIndex: 10 }}>
         <div style={{ maxWidth: 680, margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <span style={{ fontWeight: 700, fontSize: 18, color: '#1a56db' }}>Alyra</span>
@@ -111,7 +125,6 @@ export default function DashboardPage() {
 
       <div style={{ maxWidth: 680, margin: '0 auto', padding: '24px 16px' }}>
 
-        {/* No device state */}
         {devices.length === 0 && (
           <div style={{ background: '#fff', border: '2px dashed #e5e7eb', borderRadius: 16, padding: '40px 24px', textAlign: 'center', marginBottom: 20 }}>
             <div style={{ fontWeight: 600, color: '#111827', marginBottom: 8, fontSize: 16 }}>No device linked yet</div>
@@ -131,10 +144,8 @@ export default function DashboardPage() {
 
           return (
             <div key={device.id}>
-              {/* Depletion alert */}
               {pred && pred.needs_alert && <AlertBanner prediction={pred} deviceId={device.id} />}
 
-              {/* Device card */}
               <div style={{ background: '#1a56db', borderRadius: 18, padding: '24px', marginBottom: 16, color: '#fff' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 }}>
                   <div>
@@ -156,7 +167,6 @@ export default function DashboardPage() {
                   </div>
                 </div>
 
-                {/* Progress bar */}
                 <div style={{ background: 'rgba(255,255,255,0.2)', borderRadius: 6, height: 8 }}>
                   <div style={{ height: '100%', borderRadius: 6, background: low ? '#ef4444' : '#6ee7b7', width: `${pct}%`, transition: 'width 0.5s' }} />
                 </div>
@@ -167,7 +177,6 @@ export default function DashboardPage() {
                 </div>
               </div>
 
-              {/* Buy button */}
               <Link href={`/dashboard/buy?device=${device.id}`}
                 style={{ display: 'block', background: '#16a34a', color: '#fff', padding: '15px', borderRadius: 12, fontWeight: 700, fontSize: 15, textAlign: 'center', textDecoration: 'none', marginBottom: 20 }}>
                 Buy Energy Tokens
@@ -176,7 +185,6 @@ export default function DashboardPage() {
           );
         })}
 
-        {/* Daily usage chart */}
         {dailyUsage.length > 0 && (
           <div style={{ background: '#fff', borderRadius: 16, padding: 20, border: '1px solid #e5e7eb', marginBottom: 20 }}>
             <div style={{ fontWeight: 700, fontSize: 15, color: '#111827', marginBottom: 4 }}>Daily Energy Purchased</div>
@@ -192,7 +200,6 @@ export default function DashboardPage() {
           </div>
         )}
 
-        {/* Recent transactions */}
         <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #e5e7eb', overflow: 'hidden' }}>
           <div style={{ padding: '16px 20px', borderBottom: '1px solid #f3f4f6', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <span style={{ fontWeight: 700, fontSize: 15, color: '#111827' }}>Recent Transactions</span>
@@ -224,7 +231,6 @@ export default function DashboardPage() {
           )}
         </div>
 
-        {/* Register device link if no devices */}
         {devices.length === 0 && (
           <div style={{ marginTop: 16, textAlign: 'center' }}>
             <Link href="/vendor/register" style={{ color: '#1a56db', fontSize: 13, textDecoration: 'none' }}>

@@ -41,6 +41,7 @@ pub struct UserResponse {
     pub email: Option<String>,
     pub state: Option<String>,
     pub lga: Option<String>,
+    pub vendor_id: Option<Uuid>,
     pub is_verified: bool,
     pub kyc_level: String,
 }
@@ -57,6 +58,7 @@ impl From<User> for UserResponse {
             lga: user.lga,
             is_verified: user.is_verified,
             kyc_level: user.kyc_level,
+            vendor_id: user.vendor_id,
         }
     }
 }

@@ -1,61 +1,73 @@
-
-'use client';
 import Link from 'next/link';
 
-export default function Home() {
+export default function HomePage() {
   return (
-    <div style={{ minHeight: '100dvh', display: 'flex', flexDirection: 'column' }}>
-
+    <main style={{ minHeight: '100vh', background: '#fff', fontFamily: 'system-ui, sans-serif' }}>
       {/* Nav */}
-      <nav style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px', maxWidth: '1100px', margin: '0 auto', width: '100%' }}>
-        <div className="logo">
-          <div className="logo-mark">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" fill="white"/></svg>
-          </div>
-          <span className="logo-text">Alyra</span>
-        </div>
-        <div style={{ display: 'flex', gap: '8px' }}>
-          <Link href="/login"><button className="btn btn-secondary btn-sm">Sign in</button></Link>
-          <Link href="/register"><button className="btn btn-primary btn-sm">Get started</button></Link>
+      <nav style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '18px 24px', borderBottom: '1px solid #e5e7eb', maxWidth: 960, margin: '0 auto' }}>
+        <div style={{ fontWeight: 700, fontSize: 20, color: '#1a56db', letterSpacing: '-0.5px' }}>Alyra</div>
+        <div style={{ display: 'flex', gap: 12 }}>
+          <Link href="/login" style={{ color: '#4b5563', fontWeight: 500, textDecoration: 'none', padding: '8px 16px', borderRadius: 8, border: '1px solid #e5e7eb', fontSize: 14 }}>Sign In</Link>
+          <Link href="/register" style={{ background: '#1a56db', color: '#fff', fontWeight: 600, textDecoration: 'none', padding: '8px 18px', borderRadius: 8, fontSize: 14 }}>Get Started</Link>
         </div>
       </nav>
 
       {/* Hero */}
-      <main style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '40px 20px', textAlign: 'center', maxWidth: '640px', margin: '0 auto' }}>
-        <div className="badge badge-purple" style={{ marginBottom: '24px', fontSize: '13px' }}>Smart energy for Nigeria</div>
-
-        <h1 style={{ fontSize: 'clamp(36px, 8vw, 64px)', fontWeight: 800, lineHeight: 1.1, marginBottom: '20px', letterSpacing: '-0.03em' }}>
-          Energy access,<br/>
-          <span style={{ color: 'var(--purple-400)' }}>without surprises.</span>
-        </h1>
-
-        <p style={{ fontSize: '17px', color: 'var(--text-secondary)', maxWidth: '480px', lineHeight: 1.65, marginBottom: '36px' }}>
-          Alyra lets households buy electricity and solar energy tokens in seconds. Predicts when power runs out. Works on any phone.
-        </p>
-
-        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', justifyContent: 'center' }}>
-          <Link href="/register"><button className="btn btn-primary" style={{ width: 'auto', padding: '14px 28px', fontSize: '16px' }}>Create account</button></Link>
-          <Link href="/login"><button className="btn btn-secondary" style={{ width: 'auto', padding: '14px 28px', fontSize: '16px' }}>Sign in</button></Link>
+      <section style={{ maxWidth: 960, margin: '0 auto', padding: '64px 24px 48px' }}>
+        <div style={{ display: 'inline-block', background: '#dbeafe', color: '#1a56db', fontSize: 12, fontWeight: 600, padding: '4px 12px', borderRadius: 20, marginBottom: 20, letterSpacing: '0.05em', textTransform: 'uppercase' }}>
+          Smart Energy Platform
         </div>
+        <h1 style={{ fontSize: 44, fontWeight: 800, lineHeight: 1.1, color: '#111827', marginBottom: 18, maxWidth: 600, letterSpacing: '-1px' }}>
+          Know exactly when your power will run out — before it does
+        </h1>
+        <p style={{ fontSize: 17, color: '#4b5563', lineHeight: 1.65, maxWidth: 540, marginBottom: 32 }}>
+          Alyra unifies grid prepaid meters and solar PAYG systems. Buy energy tokens, get predictive depletion alerts, and top up in amounts that match your income — from any phone, with or without internet.
+        </p>
+        <div style={{ display: 'flex', gap: 12 }}>
+          <Link href="/register" style={{ background: '#1a56db', color: '#fff', fontWeight: 600, padding: '13px 28px', borderRadius: 10, textDecoration: 'none', fontSize: 15 }}>Create Account</Link>
+          <Link href="/login" style={{ color: '#1a56db', fontWeight: 600, padding: '13px 24px', borderRadius: 10, textDecoration: 'none', fontSize: 15, border: '1.5px solid #1a56db' }}>Sign In</Link>
+        </div>
+      </section>
 
-        {/* Features */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '12px', marginTop: '60px', width: '100%', textAlign: 'left' }}>
+      {/* Stats */}
+      <section style={{ background: '#f8fafc', borderTop: '1px solid #e5e7eb', borderBottom: '1px solid #e5e7eb' }}>
+        <div style={{ maxWidth: 960, margin: '0 auto', padding: '32px 24px', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 24 }}>
           {[
-            { title: 'Grid Meters', desc: 'Top up prepaid meters. Receive a 20-digit STS token via SMS.' },
-            { title: 'Solar PAYG', desc: 'Pay-as-you-go solar kits. Unlock daily access with micro-payments.' },
-            { title: 'Predictive Alerts', desc: 'Know before your power runs out. Alerts sent before depletion.' },
-          ].map(f => (
-            <div key={f.title} className="card-sm" style={{ borderRadius: '14px' }}>
-              <div style={{ fontWeight: 700, fontSize: '14px', marginBottom: '6px' }}>{f.title}</div>
-              <div style={{ fontSize: '13px', color: 'var(--text-secondary)', lineHeight: '1.55' }}>{f.desc}</div>
+            { stat: '80M+', label: 'Nigerians without reliable electricity' },
+            { stat: '60 sec', label: 'Average time to receive energy token' },
+            { stat: '100%', label: 'Works on feature phones, no internet needed' },
+          ].map(({ stat, label }) => (
+            <div key={stat} style={{ textAlign: 'center', padding: '24px 16px' }}>
+              <div style={{ fontSize: 32, fontWeight: 800, color: '#1a56db', marginBottom: 6 }}>{stat}</div>
+              <div style={{ fontSize: 13, color: '#6b7280', lineHeight: 1.4 }}>{label}</div>
             </div>
           ))}
         </div>
-      </main>
+      </section>
 
-      <footer style={{ textAlign: 'center', padding: '20px', fontSize: '12px', color: 'var(--text-muted)', borderTop: '1px solid var(--border)' }}>
-        © 2025 Alyra Energy — Built for Nigeria
+      {/* How it works */}
+      <section style={{ maxWidth: 960, margin: '0 auto', padding: '56px 24px' }}>
+        <h2 style={{ fontSize: 28, fontWeight: 700, color: '#111827', marginBottom: 8, letterSpacing: '-0.5px' }}>How Alyra works</h2>
+        <p style={{ color: '#6b7280', marginBottom: 40, fontSize: 15 }}>Three steps to reliable electricity</p>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 24 }}>
+          {[
+            { n: '01', title: 'Register your device', desc: 'Link your grid meter or solar kit. Choose your energy vendor. One account covers both.' },
+            { n: '02', title: 'Buy in small amounts', desc: 'Select any amount from 100 naira upward. Pay via card, USSD, or bank transfer through Interswitch.' },
+            { n: '03', title: 'Get alerts before outages', desc: 'Alyra tracks your usage and sends an alert 24 hours before your power runs out, with a recommended top-up amount.' },
+          ].map(({ n, title, desc }) => (
+            <div key={n} style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 14, padding: 24 }}>
+              <div style={{ fontSize: 13, fontWeight: 700, color: '#1a56db', background: '#dbeafe', display: 'inline-block', padding: '3px 10px', borderRadius: 6, marginBottom: 14 }}>{n}</div>
+              <h3 style={{ fontWeight: 700, color: '#111827', marginBottom: 8, fontSize: 16 }}>{title}</h3>
+              <p style={{ color: '#6b7280', fontSize: 14, lineHeight: 1.55 }}>{desc}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer style={{ borderTop: '1px solid #e5e7eb', padding: '24px', textAlign: 'center', color: '#9ca3af', fontSize: 13 }}>
+        Alyra — Smart Energy Payments for Nigeria
       </footer>
-    </div>
+    </main>
   );
 }

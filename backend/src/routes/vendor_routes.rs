@@ -10,6 +10,7 @@ pub fn configure(cfg: &mut web::ServiceConfig) {
     cfg.service(
         web::scope("/api/vendors")
             .service(register_vendor)
+            .service(list_vendors)
             .service(get_vendor)
     );
 }
@@ -42,6 +43,20 @@ async fn register_vendor(state: web::Data<AppState>, body: web::Json<RegisterVen
     Ok(HttpResponse::Created().json(json!({
         "success": true,
         "data": VendorResponse::from(vendor)
+    })))
+}
+
+/// GET /api/vendors — list all approved vendors (no auth needed, for device registration for demo sub)
+#[get("")]
+async fn list_vendors(state: web::Data<AppState>) -> Result<HttpResponse, AppError> {
+    let vendors = vendor_repo::list_all(&state.db)
+        .await.map_err(AppError::DatabaseError)?;
+
+    let response: Vec<VendorResponse> = vendors.into_iter().map(VendorResponse::from).collect();
+
+    Ok(HttpResponse::Ok().json(json!({
+        "success": true,
+        "data": response
     })))
 }
 

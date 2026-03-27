@@ -32,3 +32,4 @@ reqwest = { version = "0.13.2", features = ["json", "rustls"] }
 hex = "0.4.3"
 futures = "0.3.32"
 rustls = "0.23.37"
+rand = "0.10.0"

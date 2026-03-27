@@ -45,8 +45,9 @@ function BuyContent() {
     if (finalKobo < 10000) { setError('Minimum top-up is ₦100'); return; }
     setLoading(true); setError('');
     try {
-      const data = await api.initiatePayment(selectedDevice, finalKobo, 'web');
-      window.location.href = data.payment_url;
+      router.push(
+        `/dashboard/buy/payment?device=${selectedDevice}&amount=${finalNaira}`
+      );
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Could not initiate payment');
       setLoading(false);

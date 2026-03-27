@@ -71,9 +71,9 @@ impl Config {
                 },
 
             frontend_url: std::env::var("FRONTEND_URL")
-                .unwrap_or_else(|_| "http://localhost:3000".to_string()),
+                .unwrap_or_else(|_| "https://alyraa.vercel.app".to_string()),
             cors_origins: std::env::var("CORS_ORIGINS")
-                .unwrap_or_else(|_| "http://localhost:3000".to_string()),
+                .unwrap_or_else(|_| "https://alyraa.vercel.app".to_string()),
             database_url: required_env("DATABASE_URL")?,
             redis_url: required_env("REDIS_URL")?,
 

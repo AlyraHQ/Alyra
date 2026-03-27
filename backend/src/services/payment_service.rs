@@ -110,7 +110,7 @@ pub fn build_payment_form(
     let pay_item_id = env::var("INTERSWITCH_PAY_ITEM_ID")
         .unwrap_or_else(|_| "2629132".to_string());
     let redirect_url = env::var("INTERSWITCH_REDIRECT_URL")
-        .unwrap_or_else(|_| "http://localhost:3000/payment/callback".to_string());
+        .unwrap_or_else(|_| "https://alyraa.vercel.app/payment/callback".to_string());
     let mac_key = env::var("INTERSWITCH_MAC_KEY")
     .unwrap_or_else(|_| "rUxk2gPZ74uybNw".to_string());
 

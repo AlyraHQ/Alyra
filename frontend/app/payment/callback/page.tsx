@@ -1,6 +1,6 @@
 'use client';
 import { useSearchParams } from 'next/navigation';
-import { useEffect, useState, Suspense } from 'react';
+import { useEffect, useState, Suspense, useRef } from 'react';
 import Link from 'next/link';
 import { api } from '../../../lib/api';
 
@@ -13,22 +13,42 @@ function CallbackContent() {
   const [tokenCode, setTokenCode] = useState('');
   const [units, setUnits] = useState('');
   const [errMsg, setErrMsg] = useState('');
+  
+  const hasProcessed = useRef(false);
 
   useEffect(() => {
-    if (!txnRef) { setStatus('failed'); return; }
-    if (resp && resp !== '00') { setStatus('failed'); return; }
+    // Prevent processing multiple times
+    if (hasProcessed.current) return;
+    
+    const processPayment = async () => {
+      // Handle initial validation
+      if (!txnRef) {
+        setStatus('failed');
+        hasProcessed.current = true;
+        return;
+      }
+      
+      if (resp && resp !== '00') {
+        setStatus('failed');
+        hasProcessed.current = true;
+        return;
+      }
 
-    api.testConfirm(txnRef)
-      .then(data => {
+      try {
+        const data = await api.testConfirm(txnRef);
         setTokenCode(data.token_code || '');
         setUnits(data.units || '');
         setStatus('success');
-      })
-      .catch(err => {
+      } catch (err) {
         setErrMsg(err instanceof Error ? err.message : 'Could not confirm payment');
         setStatus('failed');
-      });
-  }, [txnRef, resp]);
+      } finally {
+        hasProcessed.current = true;
+      }
+    };
+
+    processPayment();
+  }, [txnRef, resp]); // Dependencies remain the same
 
   if (status === 'loading') return (
     <div style={{ minHeight: '100vh', background: '#f5f7fa', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#1a56db', fontSize: 15 }}>

@@ -27,6 +27,16 @@ pub async fn create(pool: &PgPool,
     Ok(vendor)
 }
 
+//list all vendors
+pub async fn list_all(pool: &PgPool) -> Result<Vec<Vendor>, sqlx::Error> {
+    let vendors = sqlx::query_as::<_, Vendor>(
+        "SELECT * FROM vendors WHERE is_approved = true ORDER BY business_name ASC"
+    )
+    .fetch_all(pool).await?;
+    Ok(vendors)
+}
+
+//find vendor by phone
 pub async fn find_by_phone(pool: &PgPool, phone: &str) -> Result<Option<Vendor>, sqlx::Error> {
     let vendor = sqlx::query_as::<_, Vendor>(
         "SELECT * FROM vendors WHERE phone = $1",
@@ -38,6 +48,7 @@ pub async fn find_by_phone(pool: &PgPool, phone: &str) -> Result<Option<Vendor>,
     Ok(vendor)
 }
 
+//find vendor by id
 pub async fn find_by_id(pool: &PgPool, id: Uuid) -> Result<Option<Vendor>, sqlx::Error> {
     let vendor = sqlx::query_as::<_, Vendor>(
         "SELECT * FROM vendors WHERE id = $1",
@@ -49,6 +60,7 @@ pub async fn find_by_id(pool: &PgPool, id: Uuid) -> Result<Option<Vendor>, sqlx:
     Ok(vendor)
 }
 
+//aprove vendor
 pub async fn approve(pool: &PgPool, id: Uuid) -> Result<(), sqlx::Error> {
     sqlx::query(
         "UPDATE vendors SET is_approved = true WHERE id = $1",

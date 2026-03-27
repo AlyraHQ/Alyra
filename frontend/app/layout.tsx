@@ -1,41 +1,27 @@
-// import type { Metadata } from "next";
-// import { Inter } from "next/font/google";
-// import "./globals.css";
-
-// const inter = Inter({ subsets: ["latin"] });
-
-// export const metadata: Metadata = {
-//   title: "Alyra — Smart Energy Access",
-//   description: "Flexible, predictive electricity access for Nigerian/Africa households.",
-// };
-
-// export default function RootLayout({ children }: { children: React.ReactNode }) {
-//   return (
-//     <html lang="en">
-//       <body className={`${inter.className} bg-gray-950 text-white antialiased`}>
-//         {children}
-//       </body>
-//     </html>
-//   );
-// }
-
 // app/layout.tsx
 import type { Metadata } from 'next';
-import { Syne, DM_Sans } from 'next/font/google';
+import { Plus_Jakarta_Sans, DM_Sans, Syne } from 'next/font/google';
 import './globals.css';
 
 // Configure fonts with Next.js optimization
-const syne = Syne({
+const plusJakarta = Plus_Jakarta_Sans({
   subsets: ['latin'],
-  weight: ['400', '600', '700', '800'],
-  variable: '--font-syne',
+  weight: ['400', '500', '600', '700', '800'],
+  variable: '--font-plus-jakarta',
   display: 'swap',
 });
 
 const dmSans = DM_Sans({
   subsets: ['latin'],
-  weight: ['300', '400', '500'],
+  weight: ['400', '500'],
   variable: '--font-dm-sans',
+  display: 'swap',
+});
+
+const syne = Syne({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700', '800'],
+  variable: '--font-syne',
   display: 'swap',
 });
 
@@ -45,9 +31,13 @@ export const metadata: Metadata = {
   themeColor: '#7c3aed',
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
-    <html lang="en" className={`${syne.variable} ${dmSans.variable}`}>
+    <html lang="en" className={`${plusJakarta.variable} ${dmSans.variable} ${syne.variable}`}>
       <body>{children}</body>
     </html>
   );

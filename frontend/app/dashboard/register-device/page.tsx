@@ -1,120 +1,53 @@
-// 'use client';
-// import { useState, useEffect } from 'react';
-// import { useRouter } from 'next/navigation';
-// import { api } from '../../../lib/api';
-
-// export default function RegisterDevice() {
-//   const router = useRouter();
-//   const [form, setForm] = useState({ device_name: '', meter_number: '', tariff_kobo_per_kwh: '8500', state: '', lga: '' });
-//   const [error, setError] = useState('');
-//   const [loading, setLoading] = useState(false);
-
-//   useEffect(() => {
-//     if (!localStorage.getItem('alyra_token')) router.push('/login');
-//   }, [router]);
-
-//   const handleSubmit = async (e: React.FormEvent) => {
-//     e.preventDefault();
-//     setLoading(true);
-//     setError('');
-//     try {
-//       await api.registerGridMeter({
-//         device_name: form.device_name,
-//         meter_number: form.meter_number,
-//         tariff_kobo_per_kwh: parseInt(form.tariff_kobo_per_kwh),
-//         state: form.state || undefined,
-//         lga: form.lga || undefined,
-//       });
-//       router.push('/dashboard');
-//     } catch (err: unknown) {
-//       setError(err instanceof Error ? err.message : 'Failed to register device');
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
-
-//   const update = (field: string) => (e: React.ChangeEvent<HTMLInputElement>) =>
-//     setForm(prev => ({ ...prev, [field]: e.target.value }));
-
-//   const inputStyle = { width: '100%', padding: '13px 14px', borderRadius: 10, border: '1px solid rgba(255,255,255,0.1)', background: '#1a1a1a', color: '#fff', fontSize: 15, outline: 'none', boxSizing: 'border-box' as const, marginBottom: 16, fontFamily: 'inherit' };
-//   const labelStyle = { display: 'block', fontSize: 13, fontWeight: 500, color: 'rgba(255,255,255,0.6)', marginBottom: 6 } as React.CSSProperties;
-
-//   return (
-//     <main style={{ minHeight: '100vh', background: '#0a0a0a', fontFamily: 'system-ui, sans-serif', color: '#fff' }}>
-//       <div style={{ background: '#111', borderBottom: '1px solid rgba(255,255,255,0.08)', padding: '16px 24px', display: 'flex', alignItems: 'center', gap: 12 }}>
-//         <button onClick={() => router.back()} style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '7px 12px', borderRadius: 8, cursor: 'pointer', fontSize: 16, fontFamily: 'inherit' }}>←</button>
-//         <div style={{ fontSize: 16, fontWeight: 700 }}>Register Grid Meter</div>
-//       </div>
-
-//       <div style={{ maxWidth: 520, margin: '0 auto', padding: '20px 24px' }}>
-//         {error && (
-//           <div style={{ background: 'rgba(255,80,80,0.1)', border: '1px solid rgba(255,80,80,0.3)', borderRadius: 8, padding: '10px 14px', color: '#ff6060', fontSize: 14, marginBottom: 16 }}>{error}</div>
-//         )}
-
-//         <form onSubmit={handleSubmit}>
-//           {[
-//             { label: 'Device Name', field: 'device_name', placeholder: 'My Home Meter' },
-//             { label: 'Meter Number', field: 'meter_number', placeholder: 'MTR-0001234' },
-//             { label: 'Tariff (kobo per kWh)', field: 'tariff_kobo_per_kwh', placeholder: '8500' },
-//             { label: 'State (optional)', field: 'state', placeholder: 'Lagos' },
-//             { label: 'LGA (optional)', field: 'lga', placeholder: 'Ikeja' },
-//           ].map(({ label, field, placeholder }) => (
-//             <div key={field}>
-//               <label style={labelStyle}>{label}</label>
-//               <input type="text" placeholder={placeholder}
-//                 value={form[field as keyof typeof form]}
-//                 onChange={update(field)} required={!['state', 'lga'].includes(field)}
-//                 style={inputStyle} />
-//             </div>
-//           ))}
-
-//           <button type="submit" disabled={loading}
-//             style={{ width: '100%', background: loading ? '#333' : '#00ff87', color: loading ? 'rgba(255,255,255,0.3)' : '#000', padding: '14px', borderRadius: 12, border: 'none', fontSize: 15, fontWeight: 700, cursor: loading ? 'not-allowed' : 'pointer', fontFamily: 'inherit' }}>
-//             {loading ? 'Registering...' : 'Register Meter →'}
-//           </button>
-//         </form>
-//       </div>
-//     </main>
-//   );
-// }
-
-
+// frontend/app/dashboard/register-device/page.tsx
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { deviceAPI, vendorAPI, authAPI } from '../../../lib/api';
 
+type Vendor = { id: string; business_name: string; owner_name: string; phone: string };
+
 export default function RegisterDevice() {
   const router = useRouter();
-  const [deviceType, setDeviceType] = useState<'grid'|'solar'>('grid');
-  const [step, setStep] = useState<'vendor'|'device'>('device');
+  const [deviceType, setDeviceType] = useState<'grid' | 'solar'>('grid');
   const [loading, setLoading] = useState(false);
+  const [loadingVendors, setLoadingVendors] = useState(true);
   const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  const [vendors, setVendors] = useState<Vendor[]>([]);
+  const [selectedVendor, setSelectedVendor] = useState('');
+  const [hasVendor, setHasVendor] = useState(false);
+  const [linkingVendor, setLinkingVendor] = useState(false);
 
-  const [vendor, setVendor] = useState({ business_name: '', owner_name: '', phone: '' });
   const [grid, setGrid] = useState({ device_name: '', meter_number: '', tariff_kobo_per_kwh: 8500, state: '', lga: '' });
   const [solar, setSolar] = useState({ device_name: '', kit_serial_number: '', daily_rate_kobo: 20000, state: '', lga: '' });
 
-  const registerVendorFirst = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true); setError('');
+  useEffect(() => {
+    async function init() {
+      try {
+        const [user, vendorList] = await Promise.all([authAPI.me(), vendorAPI.list()]);
+        setHasVendor(!!user.vendor_id);
+        setVendors(vendorList || []);
+        if (vendorList?.length > 0) setSelectedVendor(vendorList[0].id);
+      } catch { /* ignore */ }
+      finally { setLoadingVendors(false); }
+    }
+    init();
+  }, []);
+
+  const linkVendor = async () => {
+    if (!selectedVendor) return;
+    setLinkingVendor(true); setError('');
     try {
-      await vendorAPI.register(vendor);
-      setSuccess('Vendor registered! Now register your device.');
-      setStep('device');
+      await authAPI.selectVendor(selectedVendor);
+      setHasVendor(true);
     } catch (err) {
-        if (err instanceof Error && err.message?.includes('already')) {
-          setStep('device');
-        } else {
-          setError(err instanceof Error ? err.message : 'Vendor registration failed');
-        }
-    } finally { setLoading(false); }
+      setError(err instanceof Error ? err.message : 'Failed to select vendor');
+    } finally { setLinkingVendor(false); }
   };
 
   const registerDevice = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!hasVendor) { setError('Please select your energy provider first'); return; }
     setLoading(true); setError('');
     try {
       if (deviceType === 'grid') {
@@ -124,130 +57,138 @@ export default function RegisterDevice() {
       }
       router.push('/dashboard');
     } catch (err) {
-        if (err instanceof Error && err.message?.includes('vendor')) {
-          setStep('vendor');
-          setError('You need to register as a vendor first to add a device.');
-        } else {
-          setError(err instanceof Error ? err.message : 'Device registration failed');
-        }
+      setError(err instanceof Error ? err.message : 'Device registration failed');
     } finally { setLoading(false); }
   };
 
   return (
-    <main className="min-h-screen grid-bg pb-10 px-4 relative overflow-hidden">
-      <div className="orb w-64 h-64" style={{ top: '-80px', right: '-60px', background: 'rgba(124,58,237,0.28)' }} />
+    <div style={{ minHeight: '100dvh', padding: '0 16px 40px', maxWidth: '480px', margin: '0 auto' }}>
 
-      <div style={{ maxWidth: '420px', margin: '0 auto', position: 'relative', zIndex: 10, paddingTop: '24px' }}>
-        {/* Back */}
-        <Link href="/dashboard">
-          <button style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'none', border: 'none', color: 'var(--muted)', cursor: 'pointer', fontFamily: 'Syne,sans-serif', fontSize: '13px', marginBottom: '24px' }}>
-            ← Back to dashboard
-          </button>
+      {/* Header */}
+      <div style={{ padding: '20px 0 4px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+        <Link href="/dashboard" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '36px', height: '36px', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '8px', textDecoration: 'none', color: 'var(--text-secondary)', flexShrink: 0 }}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
         </Link>
-
-        <h1 style={{ fontFamily: 'Syne,sans-serif', fontWeight: 900, fontSize: '24px', marginBottom: '6px' }}>Register Device</h1>
-        <p style={{ color: 'var(--muted)', fontSize: '14px', marginBottom: '24px' }}>Add your electricity meter or solar kit</p>
-
-        {success && <div className="ok-box" style={{ marginBottom: '16px' }}>{success}</div>}
-        {error && <div className="err-box" style={{ marginBottom: '16px' }}>{error}</div>}
-
-        {/* Vendor registration step */}
-        {step === 'vendor' && (
-          <div className="card" style={{ padding: '20px', marginBottom: '16px' }}>
-            <h2 style={{ fontFamily: 'Syne,sans-serif', fontWeight: 700, fontSize: '16px', marginBottom: '4px' }}>Step 1 — Register as Vendor</h2>
-            <p style={{ color: 'var(--muted)', fontSize: '13px', marginBottom: '18px' }}>Devices must be linked to an energy vendor account.</p>
-            <form onSubmit={registerVendorFirst}>
-              <div style={{ marginBottom: '14px' }}>
-                <label className="label">Business name</label>
-                <input className="inp" placeholder="Sunshine Energy Ltd" value={vendor.business_name}
-                  onChange={e => setVendor({...vendor, business_name: e.target.value})} required />
-              </div>
-              <div style={{ marginBottom: '14px' }}>
-                <label className="label">Owner name</label>
-                <input className="inp" placeholder="Emeka Obi" value={vendor.owner_name}
-                  onChange={e => setVendor({...vendor, owner_name: e.target.value})} required />
-              </div>
-              <div style={{ marginBottom: '18px' }}>
-                <label className="label">Vendor phone</label>
-                <input className="inp" type="tel" placeholder="08012345678" value={vendor.phone}
-                  onChange={e => setVendor({...vendor, phone: e.target.value})} required />
-              </div>
-              <button className="btn btn-purple" type="submit" disabled={loading}>
-                {loading ? 'Registering...' : 'Register Vendor →'}
-              </button>
-            </form>
-          </div>
-        )}
-
-        {/* Device registration step */}
-        {step === 'device' && (
-          <div className="card" style={{ padding: '20px' }}>
-            {/* Type selector */}
-            <label className="label" style={{ marginBottom: '10px' }}>Device type</label>
-            <div style={{ display: 'flex', gap: '8px', marginBottom: '20px' }}>
-              {(['grid','solar'] as const).map(t => (
-                <button key={t} onClick={() => setDeviceType(t)}
-                  style={{ flex: 1, padding: '12px', borderRadius: '12px', border: `1px solid ${deviceType===t?'#7c3aed':'var(--border)'}`, background: deviceType===t?'rgba(124,58,237,0.15)':'rgba(255,255,255,0.03)', cursor: 'pointer', fontFamily: 'Syne,sans-serif', fontWeight: 700, fontSize: '14px', color: deviceType===t?'#c084fc':'var(--muted)', textTransform: 'capitalize' }}>
-                  {t === 'grid' ? '⚡ Grid Meter' : '☀️ Solar Kit'}
-                </button>
-              ))}
-            </div>
-
-            <form onSubmit={registerDevice}>
-              {deviceType === 'grid' ? (
-                <>
-                  <div style={{ marginBottom: '14px' }}>
-                    <label className="label">Device name</label>
-                    <input className="inp" placeholder="Kitchen Meter" value={grid.device_name}
-                      onChange={e => setGrid({...grid, device_name: e.target.value})} required />
-                  </div>
-                  <div style={{ marginBottom: '14px' }}>
-                    <label className="label">Meter number</label>
-                    <input className="inp" placeholder="45120938271" value={grid.meter_number}
-                      onChange={e => setGrid({...grid, meter_number: e.target.value})} required />
-                  </div>
-                  <div style={{ marginBottom: '14px' }}>
-                    <label className="label">State</label>
-                    <input className="inp" placeholder="Lagos" value={grid.state}
-                      onChange={e => setGrid({...grid, state: e.target.value})} />
-                  </div>
-                  <div style={{ marginBottom: '20px' }}>
-                    <label className="label">LGA</label>
-                    <input className="inp" placeholder="Ikeja" value={grid.lga}
-                      onChange={e => setGrid({...grid, lga: e.target.value})} />
-                  </div>
-                </>
-              ) : (
-                <>
-                  <div style={{ marginBottom: '14px' }}>
-                    <label className="label">Device name</label>
-                    <input className="inp" placeholder="Home Solar Kit" value={solar.device_name}
-                      onChange={e => setSolar({...solar, device_name: e.target.value})} required />
-                  </div>
-                  <div style={{ marginBottom: '14px' }}>
-                    <label className="label">Kit serial number</label>
-                    <input className="inp" placeholder="SLR-29481-NG" value={solar.kit_serial_number}
-                      onChange={e => setSolar({...solar, kit_serial_number: e.target.value})} required />
-                  </div>
-                  <div style={{ marginBottom: '14px' }}>
-                    <label className="label">State</label>
-                    <input className="inp" placeholder="Kano" value={solar.state}
-                      onChange={e => setSolar({...solar, state: e.target.value})} />
-                  </div>
-                  <div style={{ marginBottom: '20px' }}>
-                    <label className="label">LGA</label>
-                    <input className="inp" placeholder="Nassarawa" value={solar.lga}
-                      onChange={e => setSolar({...solar, lga: e.target.value})} />
-                  </div>
-                </>
-              )}
-              <button className="btn btn-purple" type="submit" disabled={loading}>
-                {loading ? 'Registering...' : 'Register Device'}
-              </button>
-            </form>
-          </div>
-        )}
+        <div>
+          <h1 style={{ fontSize: '20px', fontWeight: 800, letterSpacing: '-0.025em', margin: 0 }}>Register Device</h1>
+          <p style={{ fontSize: '13px', color: 'var(--text-muted)', margin: '2px 0 0' }}>Add your meter or solar kit</p>
+        </div>
       </div>
-    </main>
+
+      {error && <div className="alert alert-error" style={{ margin: '16px 0' }}>{error}</div>}
+
+      {/* Step 1: Vendor selection */}
+      {!loadingVendors && (
+        <div className="card" style={{ marginTop: '16px', marginBottom: '12px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
+            <div style={{ fontWeight: 700, fontSize: '15px' }}>Energy provider</div>
+            {hasVendor && <span className="badge badge-green">Linked</span>}
+          </div>
+
+          {hasVendor ? (
+            <p style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
+              Your account is linked to an energy provider. You can now register a device.
+            </p>
+          ) : vendors.length === 0 ? (
+            <div>
+              <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '12px' }}>
+                No vendors registered yet. Ask your energy provider to register on Alyra, or register one below.
+              </p>
+              <Link href="/register-vendor" style={{ textDecoration: 'none' }}>
+                <button className="btn btn-secondary" style={{ fontSize: '13px', padding: '10px' }}>Register as a vendor</button>
+              </Link>
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <div>
+                <label>Select your energy provider</label>
+                <select value={selectedVendor} onChange={e => setSelectedVendor(e.target.value)}>
+                  {vendors.map(v => (
+                    <option key={v.id} value={v.id}>{v.business_name} — {v.phone}</option>
+                  ))}
+                </select>
+              </div>
+              <button className="btn btn-primary" onClick={linkVendor} disabled={linkingVendor || !selectedVendor}>
+                {linkingVendor ? <><div className="spinner" /><span>Linking...</span></> : 'Link to this provider'}
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Step 2: Device form */}
+      <div className="card">
+        <div style={{ fontWeight: 700, fontSize: '15px', marginBottom: '14px' }}>Device details</div>
+
+        {/* Type toggle */}
+        <div style={{ marginBottom: '18px' }}>
+          <label>Device type</label>
+          <div style={{ display: 'flex', gap: '8px', marginTop: '6px' }}>
+            <button
+              type="button"
+              onClick={() => setDeviceType('grid')}
+              style={{ flex: 1, padding: '12px', borderRadius: '10px', border: `1px solid ${deviceType === 'grid' ? 'var(--purple-500)' : 'var(--border)'}`, background: deviceType === 'grid' ? 'rgba(124,58,237,0.1)' : 'var(--surface-2)', color: deviceType === 'grid' ? 'var(--purple-300)' : 'var(--text-muted)', fontFamily: 'inherit', fontWeight: 700, fontSize: '14px', cursor: 'pointer', transition: 'all 0.15s' }}>
+              Grid Meter
+            </button>
+            <button
+              type="button"
+              onClick={() => setDeviceType('solar')}
+              style={{ flex: 1, padding: '12px', borderRadius: '10px', border: `1px solid ${deviceType === 'solar' ? 'var(--purple-500)' : 'var(--border)'}`, background: deviceType === 'solar' ? 'rgba(124,58,237,0.1)' : 'var(--surface-2)', color: deviceType === 'solar' ? 'var(--purple-300)' : 'var(--text-muted)', fontFamily: 'inherit', fontWeight: 700, fontSize: '14px', cursor: 'pointer', transition: 'all 0.15s' }}>
+              Solar Kit
+            </button>
+          </div>
+        </div>
+
+        <form onSubmit={registerDevice} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+          <div>
+            <label>Device name</label>
+            <input type="text" placeholder={deviceType === 'grid' ? 'e.g. Living Room Meter' : 'e.g. Rooftop Solar Kit'}
+              value={deviceType === 'grid' ? grid.device_name : solar.device_name}
+              onChange={e => deviceType === 'grid' ? setGrid({ ...grid, device_name: e.target.value }) : setSolar({ ...solar, device_name: e.target.value })}
+              required />
+          </div>
+
+          {deviceType === 'grid' ? (
+            <div>
+              <label>Meter number</label>
+              <input type="text" placeholder="e.g. 45120938271"
+                value={grid.meter_number}
+                onChange={e => setGrid({ ...grid, meter_number: e.target.value })}
+                required />
+              <p style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '5px' }}>Found on the front of your prepaid meter</p>
+            </div>
+          ) : (
+            <div>
+              <label>Kit serial number</label>
+              <input type="text" placeholder="e.g. SLR-29481-NG"
+                value={solar.kit_serial_number}
+                onChange={e => setSolar({ ...solar, kit_serial_number: e.target.value })}
+                required />
+              <p style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '5px' }}>Found on the label of your solar unit</p>
+            </div>
+          )}
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+            <div>
+              <label>State</label>
+              <input type="text" placeholder="e.g. Lagos"
+                value={deviceType === 'grid' ? grid.state : solar.state}
+                onChange={e => deviceType === 'grid' ? setGrid({ ...grid, state: e.target.value }) : setSolar({ ...solar, state: e.target.value })} />
+            </div>
+            <div>
+              <label>LGA</label>
+              <input type="text" placeholder="e.g. Ikeja"
+                value={deviceType === 'grid' ? grid.lga : solar.lga}
+                onChange={e => deviceType === 'grid' ? setGrid({ ...grid, lga: e.target.value }) : setSolar({ ...solar, lga: e.target.value })} />
+            </div>
+          </div>
+
+          <button className="btn btn-primary" type="submit" disabled={loading || !hasVendor} style={{ marginTop: '4px' }}>
+            {loading ? <><div className="spinner" /><span>Registering...</span></> : 'Register device'}
+          </button>
+          {!hasVendor && <p style={{ fontSize: '12px', color: 'var(--text-muted)', textAlign: 'center', marginTop: '-4px' }}>Link to an energy provider above first</p>}
+        </form>
+      </div>
+    </div>
   );
 }

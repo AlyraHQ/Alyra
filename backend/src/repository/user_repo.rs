@@ -34,6 +34,7 @@ pub async fn create(
     email: Option<&str>,
     state: Option<&str>,
     lga: Option<&str>,
+    vendor_id: Option<Uuid>
 ) -> Result<User, sqlx::Error> {
     let user = sqlx::query_as::<_, User>(
         "INSERT INTO users (phone, pin_hash, full_name, email, state, lga)
@@ -60,5 +61,11 @@ pub async fn update_verified(pool: &PgPool, id: Uuid) -> Result<(), sqlx::Error>
     .fetch_optional(pool)
     .await?;
 
+    Ok(())
+}
+
+pub async fn update_vendor(pool: &PgPool, user_id: Uuid, vendor_id: Uuid) -> Result<(), sqlx::Error> {
+    sqlx::query("UPDATE users SET vendor_id = $1 WHERE id = $2")
+        .bind(vendor_id).bind(user_id).execute(pool).await?;
     Ok(())
 }

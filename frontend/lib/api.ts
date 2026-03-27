@@ -15,6 +15,13 @@ async function req(endpoint: string, options: RequestInit = {}) {
   return json.data ?? json;
 }
 
+export interface Prediction {
+  predicted_depletion_hours: number;
+  current_units: number;
+  recommended_topup_naira: number;
+  recommended_units: number;
+}
+
 export const api = {
   // Auth
   register: (data: { phone: string; pin: string; full_name: string; vendor_id?: string }) =>
@@ -34,7 +41,8 @@ export const api = {
     req('/api/devices/grid', { method: 'POST', body: JSON.stringify(data) }),
   registerSolar: (data: { device_name: string; kit_serial_number: string; daily_rate_kobo: number; state?: string; lga?: string; vendor_id?: string }) =>
     req('/api/devices/solar', { method: 'POST', body: JSON.stringify(data) }),
-  getPrediction: (deviceId: string) => req(`/api/devices/${deviceId}/prediction`),
+  getPrediction: (deviceId: string): Promise<Prediction> =>
+    req(`/api/devices/${deviceId}/prediction`),
 
   // Payments
   initiatePayment: (device_id: string, amount_kobo: number, channel: string) =>

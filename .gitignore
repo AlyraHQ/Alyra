@@ -24,3 +24,6 @@ node_modules/
 backend/config/keys/
 *.pem
 .env
+
+//frontend
+.env.local

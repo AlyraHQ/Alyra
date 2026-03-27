@@ -12,6 +12,7 @@ pub struct RegisterGridMeterRequest {
     pub tariff_kobo_per_kwh:    i64,
     pub state:                  Option<String>,
     pub lga:                    Option<String>,
+    pub vendor_id:              Option<Uuid>
 }
 
 
@@ -23,6 +24,7 @@ pub struct RegisterSolarKitRequest {
     pub daily_rate_kobo:        i64,
     pub state:                  Option<String>,
     pub lga:                    Option<String>,
+    pub vendor_id:              Option<Uuid>
 
 }
 /// device info{resp} sent to frontend dashboard

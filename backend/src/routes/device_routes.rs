@@ -1,10 +1,11 @@
 use actix_web::{post, get, web, HttpResponse};
+
 use serde_json::json;
 use uuid::Uuid;
 
 use crate::state::AppState;
 use crate::errors::AppError;
-use crate::middleware::auth::AuthUser;
+use crate::middleware::auth::{AuthUser};
 use crate::repository::{device_repo, user_repo};
 use crate::dto::device_dto::{
     RegisterGridMeterRequest,
@@ -61,21 +62,27 @@ async fn get_device(state: web::Data<AppState>,auth_user: AuthUser,path: web::Pa
 
 /// -- POST /api/devices/grid — here for register a grid meter
 #[post("/grid")]
-async fn register_grid_meter(state: web::Data<AppState>, auth_user: AuthUser,
-    body: web::Json<RegisterGridMeterRequest>) -> Result<HttpResponse, AppError> {
+async fn register_grid_meter(
+    state: web::Data<AppState>, 
+    auth_user: AuthUser,
+    body: web::Json<RegisterGridMeterRequest>
+) -> Result<HttpResponse, AppError> {
     let req = body.into_inner();
 
-    // --- Get user's vendor_id — required -- a must to register device
+    // Get user to check if they have vendor_id, but allow vendor_id from request
     let user = user_repo::find_by_id(&state.db, auth_user.id)
         .await
         .map_err(AppError::DatabaseError)?
         .ok_or_else(|| AppError::NotFound("User not found".to_string()))?;
 
-    let vendor_id = user.vendor_id.ok_or_else(|| {
-        AppError::BadRequest("User must be registered under a vendor".to_string())
-    })?;
+    // Use vendor_id from request body first, fall back to user's vendor_id
+    let vendor_id = req.vendor_id
+        .or(user.vendor_id)
+        .ok_or_else(|| {
+            AppError::BadRequest("User must be registered under a vendor or provide vendor_id".to_string())
+        })?;
 
-    // --- Create parent device record
+    // Create parent device record
     let device = device_repo::create(
         &state.db,
         auth_user.id,
@@ -89,7 +96,7 @@ async fn register_grid_meter(state: web::Data<AppState>, auth_user: AuthUser,
     .await
     .map_err(AppError::DatabaseError)?;
 
-    // --- Create grid_meters child record
+    // Create grid_meters child record
     sqlx::query(
         "INSERT INTO grid_meters (device_id, meter_number, tariff_kobo_per_kwh, units_balance)
          VALUES ($1, $2, $3, 0.0)"
@@ -107,20 +114,27 @@ async fn register_grid_meter(state: web::Data<AppState>, auth_user: AuthUser,
     })))
 }
 
-/// --- POST /api/devices/solar — register a solar kitt 
+/// --- POST /api/devices/solar — register a solar kit 
 #[post("/solar")]
-async fn register_solar_kit(state: web::Data<AppState>,auth_user: AuthUser,
-    body: web::Json<RegisterSolarKitRequest>) -> Result<HttpResponse, AppError> {
+async fn register_solar_kit(
+    state: web::Data<AppState>,
+    auth_user: AuthUser,
+    body: web::Json<RegisterSolarKitRequest>
+) -> Result<HttpResponse, AppError> {
     let req = body.into_inner();
 
+    // Get user to check if they have vendor_id
     let user = user_repo::find_by_id(&state.db, auth_user.id)
         .await
         .map_err(AppError::DatabaseError)?
         .ok_or_else(|| AppError::NotFound("User not found".to_string()))?;
 
-    let vendor_id = user.vendor_id.ok_or_else(|| {
-        AppError::BadRequest("User must be registered under a vendor".to_string())
-    })?;
+    // Use vendor_id from request body first, fall back to user's vendor_id
+    let vendor_id = req.vendor_id
+        .or(user.vendor_id)
+        .ok_or_else(|| {
+            AppError::BadRequest("User must be registered under a vendor or provide vendor_id".to_string())
+        })?;
 
     let device = device_repo::create(
         &state.db,
@@ -152,7 +166,6 @@ async fn register_solar_kit(state: web::Data<AppState>,auth_user: AuthUser,
         "data": DeviceResponse::from(device)
     })))
 }
-
 //prediction endpoint 
 #[get("/{id}/prediction")]
 async fn get_prediction(

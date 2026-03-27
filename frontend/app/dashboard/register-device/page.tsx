@@ -65,6 +65,7 @@ export default function RegisterDevicePage() {
           tariff_kobo_per_kwh: parseInt(form.tariff_kobo_per_kwh),
           state: form.state || undefined,
           lga: form.lga || undefined,
+          vendor_id: form.vendor_id,
         });
       } else {
         await api.registerSolar({
@@ -73,6 +74,7 @@ export default function RegisterDevicePage() {
           daily_rate_kobo: parseInt(form.daily_rate_kobo),
           state: form.state || undefined,
           lga: form.lga || undefined,
+          vendor_id: form.vendor_id,
         });
       }
       router.push('/dashboard');
